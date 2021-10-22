@@ -1,0 +1,13 @@
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${APP_SECRET:ceposto2021}
+  
+spring:
+  datasource:
+    url: jdbc:${DB_TYPE:postgresql}://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:ceposto2021}
+
