@@ -26,9 +26,15 @@ public class UserRepository {
      *
      * @return Il secret se il login è andato a buon fine, `null` altrimenti
      */
-    public String hasValidCredentials(String email, String password) {
-        String query = "SELECT secret FROM auth_users where email = " + email + " AND password = " + password;
-        return jdbcTemplate.queryForObject(query, String.class);
+    public boolean hasValidCredentials(String email, String password) {
+        String query = "SELECT email FROM auth_users WHERE email = ? AND password = ?";
+
+        try {
+            final var found = jdbcTemplate.queryForObject(query, String.class, email, password);
+            return found != null;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     /**

@@ -1,71 +1,47 @@
 package it.decimo.auth_service.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.decimo.auth_service.authorization.JwtUtils;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.dto.LoginBody;
-import it.decimo.auth_service.repository.UserRepository;
+import it.decimo.auth_service.dto.response.BasicResponse;
+import it.decimo.auth_service.dto.response.LoginResponse;
+import it.decimo.auth_service.services.AuthService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 
 @RestController
 @RequestMapping(path = "/api/auth")
 @Slf4j
 public class AuthController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private final UserRepository userRepository;
-    private JwtUtils jwtUtils;
+    private final AuthService authService;
 
-    public AuthController(UserRepository userRepository, JwtUtils jwtUtils) {
-        this.userRepository = userRepository;
-        this.jwtUtils = jwtUtils;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    @PostMapping("/login")
-    ResponseEntity<String> login(@RequestBody LoginBody body) {
-        logger.info("Received login request for user {}", body.getUsername());
-        final String secret = userRepository.hasValidCredentials(body.getUsername(), body.getPassword());
-        if (secret == null) {
-            logger.warn("User {} sent invalid credentials", body.getUsername());
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
-        //TODO generare JWT
-        logger.info("User {} has logged in", body.getUsername());
-        return ResponseEntity.ok("OK");
+    @PostMapping(value = "/login", produces = {"application/json"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "Il login è andato bene"),
+            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare il login"),
+            @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "L'username contenuto nel JWT non esiste nel db"),
+            @ApiResponse(responseCode = "422", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "JWT scaduto o formattatno male"),
+    })
+    ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt, @RequestBody(required = false) LoginBody body) {
+        return authService.login(jwt, body);
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", produces = {"application/json"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "La registrazione è andata bene"),
+            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare la registrazione"),
+    })
     @SneakyThrows
-    ResponseEntity<String> register(@RequestBody LoginBody body) {
-        logger.info("Registering {}", body.getUsername());
-        final var registered = userRepository.register(body.getUsername(), body.getPassword());
-        if (!registered) {
-            logger.warn("User has sent credentials already in use {}", body.getUsername());
-            return ResponseEntity.status(422).body("Credentials already in use");
-        }
-        final var jwt = jwtUtils.generateJwt(body);
-        return ResponseEntity.ok(new ObjectMapper().writeValueAsString(new HashMap<String, String>() {{
-            put("access-token", jwt);
-        }}));
-    }
-
-    @PostMapping("/auto")
-    ResponseEntity<String> autoLogin(@RequestHeader(value = "access-token") String jwt) {
-        logger.info("Received autologin request");
-        if (jwt == null) {
-            return ResponseEntity.status(401).body("Missing access-token");
-        }
-        final var isValid = jwtUtils.isJwtValid(jwt);
-        if (isValid) {
-            return ResponseEntity.ok("OK");
-        } else {
-            return ResponseEntity.status(401).body("You have to re-login");
-        }
-
+    ResponseEntity<Object> register(@RequestBody LoginBody body) {
+        return authService.register(body);
     }
 }
