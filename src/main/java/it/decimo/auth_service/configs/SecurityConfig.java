@@ -28,7 +28,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new JwtInterceptor(jwtUtils, mapper))
-                .addPathPatterns("/api/**");
+                .addPathPatterns("/**")
+                .excludePathPatterns("/swagger-ui/**");
     }
 }
 
@@ -52,6 +53,7 @@ class JwtInterceptor implements HandlerInterceptor {
                              Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             var needLogin = ((HandlerMethod) handler).getMethodAnnotation(NeedLogin.class);
+
             if (needLogin == null) {
                 needLogin = ((HandlerMethod) handler).getMethod().getDeclaringClass()
                         .getAnnotation(NeedLogin.class);

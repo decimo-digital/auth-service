@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping(path = "/api/auth")
-@Slf4j
 public class AuthController {
     private final AuthService authService;
 
@@ -30,6 +29,7 @@ public class AuthController {
     @PostMapping(value = "/login", produces = {"application/json"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "Il login è andato bene"),
+            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Manca il JWT"),
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare il login"),
             @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "L'username contenuto nel JWT non esiste nel db"),
             @ApiResponse(responseCode = "422", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "JWT scaduto o formattatno male"),

@@ -93,7 +93,7 @@ public class AuthService {
     private ResponseEntity<Object> autologin(String jwt) {
         logger.info("Received autologin request");
         if (jwt == null) {
-            return ResponseEntity.status(401).body(new BasicResponse("Missing access-token", "NO_ACCESS_TOKEN"));
+            return ResponseEntity.status(400).body(new BasicResponse("Missing access-token", "NO_ACCESS_TOKEN"));
         }
         try {
             final var isValid = jwtUtils.isJwtValid(jwt);
