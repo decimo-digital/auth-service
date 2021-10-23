@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.sql.Statement;
 
@@ -76,5 +77,31 @@ public class UserRepository {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    /**
+     * Registra sul db la nuova autenticazione dell'utente
+     *
+     * @param username L'utente che ha fatto la login
+     * @param ip       L'ip recuperato dalla request
+     */
+    public void logAuthentication(String username, String ip) {
+        String idQuery = "SELECT id FROM auth_users WHERE email = ?";
+
+        final var id = jdbcTemplate.queryForObject(idQuery, Integer.class, username);
+
+        if (id == null) {
+            logger.error("User {} not found", username);
+            throw new NotFoundException("User with username " + username + " doesn't exists");
+        }
+
+        String query = "INSERT INTO login_data (user_id, ip) VALUES (?, ?)";
+
+        jdbcTemplate.update(conn -> {
+            final var statement = conn.prepareStatement(query);
+            statement.setInt(1, id);
+            statement.setString(2, ip);
+            return statement;
+        });
     }
 }

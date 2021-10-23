@@ -7,6 +7,7 @@ import it.decimo.auth_service.repository.UserRepository;
 import it.decimo.auth_service.utils.exception.ExpiredJWTException;
 import it.decimo.auth_service.utils.exception.InvalidJWTBody;
 import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -87,7 +88,7 @@ public class AuthService {
      * Effettua il login automatico tramite l'utilizzo del jwt
      *
      * @param jwt Il jwt da utilizzare
-     * @return
+     * @return La coppia di token se la registrazione è andata bene, null altrimenti
      */
     private ResponseEntity<Object> autologin(String jwt) {
         logger.info("Received autologin request");
@@ -110,4 +111,25 @@ public class AuthService {
         }
     }
 
+    /**
+     * Wrapper della {@link #logNewLogin} ma che accetta il JWT
+     *
+     * @param jwt Il jwt dal quale recuperare l'username
+     * @param ip  L'indirizzo recuperato dalla request
+     */
+    @SneakyThrows
+    public void logNewLoginFromJwt(String jwt, String ip) {
+        final var username = ((String) jwtUtils.extractField(jwt, "username"));
+        logNewLogin(username, ip);
+    }
+
+    /**
+     * Registra la nuova login sul db per l'utente
+     *
+     * @param username L'utente per cui registrare l'accesso
+     * @param ip       l'indirizzo recuperato dalla request
+     */
+    public void logNewLogin(String username, String ip) {
+        userRepository.logAuthentication(username, ip);
+    }
 }

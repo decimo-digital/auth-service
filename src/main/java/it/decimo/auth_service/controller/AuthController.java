@@ -8,11 +8,13 @@ import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.dto.response.LoginResponse;
 import it.decimo.auth_service.services.AuthService;
-import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -32,8 +34,17 @@ public class AuthController {
             @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "L'username contenuto nel JWT non esiste nel db"),
             @ApiResponse(responseCode = "422", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "JWT scaduto o formattatno male"),
     })
-    public ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt, @RequestBody(required = false) LoginBody body) {
-        return authService.login(jwt, body);
+    public ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt, @RequestBody(required = false) LoginBody body, HttpServletRequest request) {
+        final var response = authService.login(jwt, body);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            final var ip = request.getRemoteAddr();
+            if (jwt != null) {
+                authService.logNewLoginFromJwt(jwt, ip);
+            } else {
+                authService.logNewLogin(body.getUsername(), ip);
+            }
+        }
+        return response;
     }
 
     @PostMapping(value = "/register", produces = {"application/json"})
@@ -42,13 +53,12 @@ public class AuthController {
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare la registrazione"),
     })
     @SneakyThrows
-    public ResponseEntity<Object> register(@RequestBody LoginBody body) {
-        return authService.register(body);
-    }
-
-    @GetMapping("/test")
-    @NeedLogin
-    public ResponseEntity<Object> test(@RequestHeader(value = "access-token", required = false) String accessToken) {
-        return ResponseEntity.ok(new BasicResponse("Yupw", "OK"));
+    public ResponseEntity<Object> register(@RequestBody LoginBody body, HttpServletRequest request) {
+        final var response = authService.register(body);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            final var ip = request.getRemoteAddr();
+            authService.logNewLogin(body.getUsername(), ip);
+        }
+        return response;
     }
 }

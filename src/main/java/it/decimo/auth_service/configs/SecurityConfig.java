@@ -57,26 +57,21 @@ class JwtInterceptor implements HandlerInterceptor {
                         .getAnnotation(NeedLogin.class);
             }
 
-            // Check login if you have login validation annotations
             boolean canContinue = false;
             if (needLogin != null) {
                 final var headers = request.getHeaders("access-token");
                 if (headers.hasMoreElements()) {
                     do {
                         final var header = headers.nextElement();
-                        final var isValid = jwtUtils.isJwtValid(header);
-                        if (!isValid) {
-                            response.setCharacterEncoding("UTF-8");
-                            response.getWriter().write("Not logged in!");
-                            response.sendError(401);
-                            canContinue = false;
-                        } else {
-                            canContinue = true;
-                        }
+                        canContinue = jwtUtils.isJwtValid(header);
                         break;
                     } while (headers.hasMoreElements());
                 }
+            } else {
+                // Se arriva qua vuol dire che l'annotation NeedLogin non era impostata
+                return true;
             }
+
             if (!canContinue) {
                 response.setStatus(401);
                 final var message = mapper.writeValueAsString(new BasicResponse("Missing access-token", "NO_ACCESS_TOKEN"));

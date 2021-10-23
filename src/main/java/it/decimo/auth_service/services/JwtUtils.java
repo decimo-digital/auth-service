@@ -66,7 +66,7 @@ public class JwtUtils {
      * @throws MissingKeyException           se la chiave {@param fieldName} non esiste all'interno del {@param jwt}
      * @throws InvalidPayloadFormatException se il {@param jwt} contiene un payload formattato male
      */
-    private Object extractField(String jwt, String fieldName) throws MissingKeyException, InvalidPayloadFormatException {
+    public Object extractField(String jwt, String fieldName) throws MissingKeyException, InvalidPayloadFormatException {
         final var payload = jwt.substring(jwt.indexOf(".") + 1, jwt.lastIndexOf("."));
         final var payloadAsMap = payloadToMap(payload);
         if (!payloadAsMap.containsKey(fieldName)) {
