@@ -8,6 +8,7 @@ import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.dto.response.LoginResponse;
 import it.decimo.auth_service.services.AuthService;
+import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "L'username contenuto nel JWT non esiste nel db"),
             @ApiResponse(responseCode = "422", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "JWT scaduto o formattatno male"),
     })
-    ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt, @RequestBody(required = false) LoginBody body) {
+    public ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt, @RequestBody(required = false) LoginBody body) {
         return authService.login(jwt, body);
     }
 
@@ -41,7 +42,13 @@ public class AuthController {
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare la registrazione"),
     })
     @SneakyThrows
-    ResponseEntity<Object> register(@RequestBody LoginBody body) {
+    public ResponseEntity<Object> register(@RequestBody LoginBody body) {
         return authService.register(body);
+    }
+
+    @GetMapping("/test")
+    @NeedLogin
+    public ResponseEntity<Object> test(@RequestHeader(value = "access-token", required = false) String accessToken) {
+        return ResponseEntity.ok(new BasicResponse("Yupw", "OK"));
     }
 }
