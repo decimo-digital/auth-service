@@ -23,8 +23,10 @@ public class UserRepository {
     }
 
     /**
-     * Valida l'accesso dell'utente {@param username} con la {@param password}
+     * Valida l'accesso dell'utente per effettuare il login
      *
+     * @param email    l'email che sta effettuando il login
+     * @param password la password (già criptata) da matchare
      * @return Il secret se il login è andato a buon fine, `null` altrimenti
      */
     public boolean hasValidCredentials(String email, String password) {
@@ -39,8 +41,10 @@ public class UserRepository {
     }
 
     /**
-     * Registra una nuova utenza nel db e gli associa un secret
+     * Registra una nuova utenza nel db
      *
+     * @param email    L'email da registrare
+     * @param password la password per effettuare la registrazione
      * @return `true` se l'inserimento è andato a buon fine, `false` altrimenti
      */
     public boolean register(String email, String password) {
@@ -66,13 +70,15 @@ public class UserRepository {
     }
 
     /**
-     * Controlla se l'utente {@param username} esiste oppure no
+     * Controlla se l'utente esiste oppure no
+     *
+     * @param email l'utente che sta facendo l'accesso
      */
-    public boolean userExists(String username) {
+    public boolean userExists(String email) {
         String query = "SELECT email FROM auth_users WHERE email = ?";
 
         try {
-            final var found = jdbcTemplate.queryForObject(query, String.class, username);
+            final var found = jdbcTemplate.queryForObject(query, String.class, email);
             return found != null;
         } catch (EmptyResultDataAccessException e) {
             return false;
@@ -82,17 +88,17 @@ public class UserRepository {
     /**
      * Registra sul db la nuova autenticazione dell'utente
      *
-     * @param username L'utente che ha fatto la login
-     * @param ip       L'ip recuperato dalla request
+     * @param email L'utente che ha fatto la login
+     * @param ip    L'ip recuperato dalla request
      */
-    public void logAuthentication(String username, String ip) {
+    public void logAuthentication(String email, String ip) {
         String idQuery = "SELECT id FROM auth_users WHERE email = ?";
 
-        final var id = jdbcTemplate.queryForObject(idQuery, Integer.class, username);
+        final var id = jdbcTemplate.queryForObject(idQuery, Integer.class, email);
 
         if (id == null) {
-            logger.error("User {} not found", username);
-            throw new NotFoundException("User with username " + username + " doesn't exists");
+            logger.error("User {} not found", email);
+            throw new NotFoundException("User with email " + email + " doesn't exists");
         }
 
         String query = "INSERT INTO login_data (user_id, ip) VALUES (?, ?)";
