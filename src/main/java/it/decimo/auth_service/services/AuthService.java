@@ -1,6 +1,8 @@
 package it.decimo.auth_service.services;
 
+import it.decimo.auth_service.connector.userService.UserRegistrationConnector;
 import it.decimo.auth_service.dto.LoginBody;
+import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.dto.response.LoginResponse;
 import it.decimo.auth_service.repository.UserRepository;
@@ -19,9 +21,12 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
-    public AuthService(UserRepository userRepository, JwtUtils jwtUtils) {
+    private final UserRegistrationConnector registrationConnector;
+
+    public AuthService(UserRepository userRepository, JwtUtils jwtUtils, UserRegistrationConnector registrationConnector) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
+        this.registrationConnector = registrationConnector;
     }
 
     /**
@@ -72,16 +77,21 @@ public class AuthService {
      * @param body I dati per la registrazione
      * @return La coppia di token se la registrazione è andata bene, null altrimenti
      */
-    public ResponseEntity<Object> register(LoginBody body) {
-        logger.info("Registering {}", body.getUsername());
-        final var registered = userRepository.register(body.getUsername(), body.getPassword());
-        if (!registered) {
-            logger.warn("User has sent credentials already in use {}", body.getUsername());
+    public ResponseEntity<Object> register(RegistrationDto body) {
+        logger.info("Registering {}", body.getEmail());
+        final var registered = userRepository.register(body.getEmail(), body.getPassword());
+        if (registered == null) {
+            logger.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
-        final var jwt = jwtUtils.generateJwt(body);
+        if (registrationConnector.register(body)) {
+            final var jwt = jwtUtils.generateJwt(LoginBody.builder().username(body.getEmail()).build());
 
-        return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
+            return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
+        } else {
+            userRepository.deleteRegistration(body.getEmail());
+            return ResponseEntity.badRequest().body(new BasicResponse("Something went wrong with the registration", "REGISTRATION_FAILED"));
+        }
     }
 
     /**

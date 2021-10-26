@@ -17,6 +17,14 @@ E' possibile specificare alcune variabili d'ambiente:
 | DB_PASSWORD | La password per accedere al DB                     |              | ceposto2021 |
 | APP_SECRET  | Il secret usato per la generazione del JWT         |              | ceposto2021 |
 
+# Connettori
+
+Per effettuare le chiamate dal gateway agli altri servizi è necessario esplicitare questi url:
+
+|       Nome        |                                  Descrizione                                   |           Url di default            | Metodo |
+| :---------------: | :----------------------------------------------------------------------------: | :---------------------------------: | :----: |
+| USER_REGISTRATION | Deve richiamare lo `user_service` per effettuare la registrazione di un utente | user_service:8080/api/user/register |  POST  |
+
 ## Build
 
 Per creare il `jar` eseguibile, bisogna eseguire

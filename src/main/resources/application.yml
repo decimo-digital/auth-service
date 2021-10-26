@@ -4,7 +4,12 @@ server:
 app:
   jwt:
     secret: ${APP_SECRET:ceposto2021}
-  
+  connectors:
+    userRegistrationConnector: ${USER_REGISTRATION:"user_service:8080/api/user/register"}
+
+
+
+
 spring:
   datasource:
     url: jdbc:${DB_TYPE:postgresql}://${DB_HOST}:${DB_PORT}/${DB_NAME}
