@@ -45,9 +45,9 @@ public class UserRepository {
      *
      * @param email    L'email da registrare
      * @param password la password per effettuare la registrazione
-     * @return `true` se l'inserimento è andato a buon fine, `false` altrimenti
+     * @return ritorna l'id dell'utente inserito se la registrazione va a buon fine, null altrimenti
      */
-    public boolean register(String email, String password) {
+    public Integer register(String email, String password) {
         try {
             String insertQuery = "INSERT INTO auth_users (email, password) values (?, ?)";
 
@@ -62,11 +62,27 @@ public class UserRepository {
                 return ps;
             }, holder);
 
-            return true;
+            String idQuery = "SELECT id FROM auth_users where email = ?";
+            return jdbcTemplate.queryForObject(idQuery, Integer.class, email);
         } catch (Exception e) {
             logger.error("Registration error: {}", e.getMessage());
-            return false;
+            return null;
         }
+    }
+
+    /**
+     * In caso la {@link #register} non funzioni, questa chiamata esegue una sorta di
+     * rollback
+     *
+     * @param email l'email dell'utenza da eliminare
+     */
+    public void deleteRegistration(String email) {
+        String deleteQuery = "DELETE FROM auth_users WHERE email = ?";
+        jdbcTemplate.update(con -> {
+            final var statement = con.prepareStatement(deleteQuery);
+            statement.setString(1, email);
+            return statement;
+        });
     }
 
     /**

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.dto.LoginBody;
+import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.dto.response.LoginResponse;
 import it.decimo.auth_service.services.AuthService;
@@ -53,11 +54,11 @@ public class AuthController {
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare la registrazione"),
     })
     @SneakyThrows
-    public ResponseEntity<Object> register(@RequestBody LoginBody body, HttpServletRequest request) {
+    public ResponseEntity<Object> register(@RequestBody RegistrationDto body, HttpServletRequest request) {
         final var response = authService.register(body);
         if (response.getStatusCode() == HttpStatus.OK) {
             final var ip = request.getRemoteAddr();
-            authService.logNewLogin(body.getUsername(), ip);
+            authService.logNewLogin(body.getEmail(), ip);
         }
         return response;
     }
