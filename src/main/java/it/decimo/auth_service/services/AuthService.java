@@ -79,11 +79,13 @@ public class AuthService {
      */
     public ResponseEntity<Object> register(RegistrationDto body) {
         logger.info("Registering {}", body.getEmail());
-        final var registered = userRepository.register(body.getEmail(), body.getPassword());
-        if (registered == null) {
+        final var id = userRepository.register(body.getEmail(), body.getPassword());
+        if (id == null) {
             logger.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
+        body.setId(id);
+        logger.info("Registering new user with id {}", body.getId());
         if (registrationConnector.register(body)) {
             final var jwt = jwtUtils.generateJwt(LoginBody.builder().username(body.getEmail()).build());
 
