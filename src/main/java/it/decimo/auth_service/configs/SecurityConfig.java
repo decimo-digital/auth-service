@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.services.JwtUtils;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
+import it.decimo.auth_service.utils.exception.ExpiredJWTException;
+import it.decimo.auth_service.utils.exception.InvalidJWTBody;
+import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +68,15 @@ class JwtInterceptor implements HandlerInterceptor {
                 if (headers.hasMoreElements()) {
                     do {
                         final var header = headers.nextElement();
-                        canContinue = jwtUtils.isJwtValid(header);
+                        try {
+                            canContinue = jwtUtils.isJwtValid(header);
+                        } catch (ExpiredJWTException e) {
+                            logger.warn("Sent an expired JWT");
+                        } catch (JWTUsernameNotExistingException e) {
+                            logger.warn("Username in jwt is non-existent");
+                        } catch (InvalidJWTBody e) {
+                            logger.warn("The jwt sent wasn't parsificable");
+                        }
                         break;
                     } while (headers.hasMoreElements());
                 }
@@ -82,8 +93,6 @@ class JwtInterceptor implements HandlerInterceptor {
                 response.setContentType("text/plain");
             }
         }
-        logger.warn("Call to {} was denied because user wasn't logged in", request.getRequestURL());
-
-        return false;
+        return true;
     }
 }

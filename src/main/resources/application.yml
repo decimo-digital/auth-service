@@ -6,8 +6,7 @@ app:
     secret: ${APP_SECRET:ceposto2021}
   connectors:
     userRegistrationConnector: ${USER_REGISTRATION:"user_service:8080/api/user/register"}
-
-
+    userInformationConnector: ${USER_INFO:"user_service:8080/api/user/{id}/info"}
 
 
 spring:

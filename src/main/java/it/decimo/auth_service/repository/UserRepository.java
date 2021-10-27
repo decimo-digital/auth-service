@@ -71,6 +71,14 @@ public class UserRepository {
     }
 
     /**
+     * Recupera l'id collegato alla email passata per parametro
+     */
+    public Integer getId(String email) {
+        final String query = "SELECT id FROM auth_users WHERE email = ?";
+        return jdbcTemplate.queryForObject(query, Integer.class, email);
+    }
+
+    /**
      * In caso la {@link #register} non funzioni, questa chiamata esegue una sorta di
      * rollback
      *

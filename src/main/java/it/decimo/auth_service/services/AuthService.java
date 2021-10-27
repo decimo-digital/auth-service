@@ -122,7 +122,7 @@ public class AuthService {
             return ResponseEntity.status(404).body(new BasicResponse("Username contained in the JWT doesn't exists", "INVALID_TOKEN"));
         }
     }
-
+    
     /**
      * Wrapper della {@link #logNewLogin} ma che accetta il JWT
      *
