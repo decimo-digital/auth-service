@@ -47,7 +47,7 @@ public class UserController {
             idToFind = Integer.parseInt(id);
         } catch (Exception ignored) {
             final var email = ((String) jwtUtils.extractField(token, "username"));
-            idToFind = userRepository.findUserByEmail(email).get().getId();
+            idToFind = userRepository.findByEmail(email).get().getId();
         }
         final var userInfo = userInformationConnector.getUserInfo(idToFind);
         if (userInfo == null) {
