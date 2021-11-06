@@ -13,13 +13,9 @@
     <name>auth_service</name>
     <description>Servizio di autenticazione e gateway per Ceposto</description>
     <properties>
-        <java.version>17</java.version>
+        <java.version>15</java.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -28,6 +24,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>2.5.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -37,10 +34,12 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>42.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>2.5.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
