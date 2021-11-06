@@ -31,11 +31,12 @@ public class UserServiceConnector {
      */
     public boolean register(RegistrationDto body) {
         try {
-
-            final var response = restTemplate.postForEntity(baseUrl + "/api/user/register", body, Map.class);
+            final var url = baseUrl + "/api/user/register";
+            log.info("Sending request to url {}", url);
+            final var response = restTemplate.postForEntity(url, body, Map.class);
             return response.getStatusCode() == HttpStatus.OK;
         } catch (Exception e) {
-            log.error("Something went wrong with the connection to user_service: {}", e);
+            log.error("Something went wrong with the connection to user_service: {}", e.getMessage());
             return false;
         }
     }

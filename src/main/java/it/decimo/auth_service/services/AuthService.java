@@ -93,7 +93,7 @@ public class AuthService {
 
             return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
         } else {
-            userRepository.deleteByEmail(body.getEmail());
+            userRepository.deleteById(body.getId());
 
             return ResponseEntity.badRequest()
                     .body(new BasicResponse("Something went wrong with the registration", "REGISTRATION_FAILED"));
