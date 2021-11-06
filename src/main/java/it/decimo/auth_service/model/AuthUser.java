@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "auth_users")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuthUser {
     @Id
     @GeneratedValue

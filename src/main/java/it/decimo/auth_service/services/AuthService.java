@@ -76,12 +76,7 @@ public class AuthService {
      */
     public ResponseEntity<Object> register(RegistrationDto body) {
         log.info("Registering {}", body.getEmail());
-        AuthUser user = new AuthUser() {
-            {
-                setEmail(body.getEmail());
-                setPassword(body.getPassword());
-            }
-        };
+        AuthUser user = AuthUser.builder().email(body.getEmail()).password(body.getPassword()).build();
 
         if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
