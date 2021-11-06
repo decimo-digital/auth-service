@@ -1,23 +1,34 @@
 package it.decimo.auth_service.services;
 
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.decimo.auth_service.configs.AppConfig;
-import it.decimo.auth_service.dto.LoginBody;
-import it.decimo.auth_service.repository.UserRepository;
-import it.decimo.auth_service.utils.exception.*;
-import lombok.SneakyThrows;
+
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.util.*;
+import it.decimo.auth_service.configs.AppConfig;
+import it.decimo.auth_service.dto.LoginBody;
+import it.decimo.auth_service.repository.UserRepository;
+import it.decimo.auth_service.utils.exception.ExpiredJWTException;
+import it.decimo.auth_service.utils.exception.InvalidJWTBody;
+import it.decimo.auth_service.utils.exception.InvalidPayloadFormatException;
+import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
+import it.decimo.auth_service.utils.exception.MissingKeyException;
+import lombok.SneakyThrows;
 
 /**
  * Classe che contiene tutte le utility per la generazione e la validazione
@@ -49,9 +60,7 @@ public class JwtUtils {
      * @param data I dati che comprendono HEADER + BODY
      * @param key  Il secret da utilizzare per il caclolo dell'HMAC
      */
-    private String calculateHMAC(String data, String key)
-            throws
-            NoSuchAlgorithmException, InvalidKeyException {
+    private String calculateHMAC(String data, String key) throws NoSuchAlgorithmException, InvalidKeyException {
         SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), HMAC_SHA512);
         Mac mac = Mac.getInstance(HMAC_SHA512);
         mac.init(secretKeySpec);
@@ -63,8 +72,10 @@ public class JwtUtils {
      *
      * @param fieldName Il nome del campo da estrarre
      * @param jwt       Il JWT completo di partenza
-     * @throws MissingKeyException           se la chiave {@param fieldName} non esiste all'interno del {@param jwt}
-     * @throws InvalidPayloadFormatException se il {@param jwt} contiene un payload formattato male
+     * @throws MissingKeyException           se la chiave {@param fieldName} non
+     *                                       esiste all'interno del {@param jwt}
+     * @throws InvalidPayloadFormatException se il {@param jwt} contiene un payload
+     *                                       formattato male
      */
     public Object extractField(String jwt, String fieldName) throws MissingKeyException, InvalidPayloadFormatException {
         final var payload = jwt.substring(jwt.indexOf(".") + 1, jwt.lastIndexOf("."));
@@ -79,7 +90,8 @@ public class JwtUtils {
      * Dato il payload di un JWT, lo ritorna sotto forma di mappa
      *
      * @param payload La parte relativa al body del jwt
-     * @throws InvalidPayloadFormatException Se il {@param payload} non è formattato correttamente
+     * @throws InvalidPayloadFormatException Se il {@param payload} non è formattato
+     *                                       correttamente
      */
     private Map payloadToMap(String payload) throws InvalidPayloadFormatException {
         try {
@@ -100,10 +112,14 @@ public class JwtUtils {
      */
     private String toHexString(byte[] bytes) {
         Formatter formatter = new Formatter();
-        for (byte b : bytes) {
-            formatter.format("%02x", b);
+        try {
+            for (byte b : bytes) {
+                formatter.format("%02x", b);
+            }
+            return formatter.toString();
+        } finally {
+            formatter.close();
         }
-        return formatter.toString();
     }
 
     /**
@@ -116,16 +132,20 @@ public class JwtUtils {
     public String generateJwt(LoginBody loginData) {
         final var iat = new Date().toInstant().toEpochMilli();
 
-        Map<String, String> header = new HashMap<>() {{
-            put("alg", alg);
-            put("typ", type);
-        }};
+        Map<String, String> header = new HashMap<>() {
+            {
+                put("alg", alg);
+                put("typ", type);
+            }
+        };
 
-        Map<String, String> payload = new HashMap<>() {{
-            put("username", loginData.getUsername());
-            put("iat", Long.toString(iat));
-            put("exp", Long.toString(iat + jwtTtl));
-        }};
+        Map<String, String> payload = new HashMap<>() {
+            {
+                put("username", loginData.getUsername());
+                put("iat", Long.toString(iat));
+                put("exp", Long.toString(iat + jwtTtl));
+            }
+        };
 
         final var headerBytes = mapper.writeValueAsString(header).getBytes(StandardCharsets.UTF_8);
         final var payloadBytes = mapper.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8);
@@ -137,14 +157,15 @@ public class JwtUtils {
         return data + "." + signature;
     }
 
-
     /**
      * Controlla se il jwt è ancora in corso di validità
      *
      * @param jwt Il JWT da controllare
      * @throws ExpiredJWTException             Se il JWT è scaduto
-     * @throws JWTUsernameNotExistingException Se l'email contenuta nel JWT non fa riferimento a nessun utente nel DB
-     * @throws InvalidJWTBody                  Se manca un qualche campo atteso all'interno del body del JWT
+     * @throws JWTUsernameNotExistingException Se l'email contenuta nel JWT non fa
+     *                                         riferimento a nessun utente nel DB
+     * @throws InvalidJWTBody                  Se manca un qualche campo atteso
+     *                                         all'interno del body del JWT
      */
     public boolean isJwtValid(String jwt) throws ExpiredJWTException, JWTUsernameNotExistingException, InvalidJWTBody {
         try {
@@ -153,7 +174,6 @@ public class JwtUtils {
 
             final var oldSignature = jwt.substring(jwt.lastIndexOf(".") + 1);
 
-
             if (!newSignature.equals(oldSignature)) {
                 logger.error("Sent a JWT with an invalid signature");
                 return false;
@@ -161,11 +181,13 @@ public class JwtUtils {
 
             final var body = payloadToMap(payload.substring(payload.indexOf(".")));
 
-            final var props = new ArrayList<String>() {{
-                add("username");
-                add("iat");
-                add("exp");
-            }};
+            final var props = new ArrayList<String>() {
+                {
+                    add("username");
+                    add("iat");
+                    add("exp");
+                }
+            };
 
             if (props.stream().anyMatch(prop -> !body.containsKey(prop))) {
                 logger.error("Sent jwt didn't have all the required props");
@@ -179,7 +201,7 @@ public class JwtUtils {
             }
 
             final var username = ((String) body.get("username"));
-            if (!userRepository.userExists(username)) {
+            if (!userRepository.findByEmail(username).isPresent()) {
                 logger.error("Username {} doesn't exists", username);
                 throw new JWTUsernameNotExistingException();
             }
