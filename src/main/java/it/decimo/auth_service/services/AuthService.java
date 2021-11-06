@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthService {
     @Autowired
-    private UserRepository testRepository;
+    private UserRepository userRepository;
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
@@ -57,8 +57,7 @@ public class AuthService {
      */
     private LoginResponse login(LoginBody body) {
         log.info("Received login request for user {}", body.getUsername());
-        final var canLogin = testRepository.findByEmailAndPassword(body.getUsername(), body.getPassword())
-                .isPresent();
+        final var canLogin = userRepository.findByEmailAndPassword(body.getUsername(), body.getPassword()).isPresent();
         if (!canLogin) {
             log.warn("User {} sent invalid credentials", body.getUsername());
             return null;
@@ -84,11 +83,13 @@ public class AuthService {
             }
         };
 
-        if (!testRepository.findByEmail(user.getEmail()).isEmpty()) {
+        if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401)
                     .body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
+
+        user = userRepository.save(user);
 
         log.info("Registering new user with id {}", user.getId());
         body.setId(user.getId());
@@ -97,7 +98,7 @@ public class AuthService {
 
             return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
         } else {
-            testRepository.deleteByEmail(body.getEmail());
+            userRepository.deleteByEmail(body.getEmail());
 
             return ResponseEntity.badRequest()
                     .body(new BasicResponse("Something went wrong with the registration", "REGISTRATION_FAILED"));

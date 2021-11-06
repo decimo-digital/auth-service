@@ -30,8 +30,14 @@ public class UserServiceConnector {
      * @return true se la registrazione è andata a buon fine, false altrimenti
      */
     public boolean register(RegistrationDto body) {
-        final var response = restTemplate.postForEntity(baseUrl + "/api/user/register", body, Map.class);
-        return response.getStatusCode() == HttpStatus.OK;
+        try {
+
+            final var response = restTemplate.postForEntity(baseUrl + "/api/user/register", body, Map.class);
+            return response.getStatusCode() == HttpStatus.OK;
+        } catch (Exception e) {
+            log.error("Something went wrong with the connection to user_service: {}", e);
+            return false;
+        }
     }
 
     /**
