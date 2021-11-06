@@ -84,7 +84,7 @@ public class AuthService {
             }
         };
 
-        if (testRepository.findByEmail(user.getEmail()).isEmpty()) {
+        if (!testRepository.findByEmail(user.getEmail()).isEmpty()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401)
                     .body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
