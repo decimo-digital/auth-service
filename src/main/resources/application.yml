@@ -13,3 +13,8 @@ spring:
     url: jdbc:${DB_TYPE:postgresql}://${DB_HOST}:${DB_PORT}/${DB_NAME:ceposto}
     username: ${DB_USERNAME:admin}
     password: ${DB_PASSWORD:ceposto2021}
+  jpa:
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
