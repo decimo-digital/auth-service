@@ -1,7 +1,5 @@
 package it.decimo.auth_service.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +33,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "L'username contenuto nel JWT non esiste nel db"),
             @ApiResponse(responseCode = "422", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "JWT scaduto o formattatno male"), })
     public ResponseEntity<Object> login(@RequestHeader(value = "access-token", required = false) String jwt,
-            @RequestBody(required = false) LoginBody body, HttpServletRequest request) {
+            @RequestBody(required = false) LoginBody body) {
         return authService.login(jwt, body);
     }
 
@@ -44,7 +42,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "La registrazione è andata bene"),
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = BasicResponse.class)), description = "Non è stato possibile effettuare la registrazione"), })
     @SneakyThrows
-    public ResponseEntity<Object> register(@RequestBody RegistrationDto body, HttpServletRequest request) {
+    public ResponseEntity<Object> register(@RequestBody RegistrationDto body) {
         return authService.register(body);
     }
 }
