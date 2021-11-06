@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import it.decimo.auth_service.connector.userService.UserRegistrationConnector;
+import it.decimo.auth_service.connector.UserServiceConnector;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -24,7 +24,7 @@ public class AuthService {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private UserRegistrationConnector registrationConnector;
+    private UserServiceConnector registrationConnector;
 
     /**
      * Wrapper per i metodi di autologin e di login con credenziali

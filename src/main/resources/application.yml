@@ -5,13 +5,11 @@ app:
   jwt:
     secret: ${APP_SECRET:ceposto2021}
   connectors:
-    userRegistrationConnector: ${USER_REGISTRATION:"user_service:8080/api/user/register"}
-    userInformationConnector: ${USER_INFO:"user_service:8080/api/user/{id}/info"}
-
+    userServiceBaseUrl: ${USER_SERVICE_HOST:"user_service:8080"}
+    merchantServiceBaseUrl: ${MERCHANT_SERVICE_HOST:"merchant_service:8080"}
 
 spring:
   datasource:
-    url: jdbc:${DB_TYPE:postgresql}://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    url: jdbc:${DB_TYPE:postgresql}://${DB_HOST}:${DB_PORT}/${DB_NAME:ceposto}
     username: ${DB_USERNAME:admin}
     password: ${DB_PASSWORD:ceposto2021}
-

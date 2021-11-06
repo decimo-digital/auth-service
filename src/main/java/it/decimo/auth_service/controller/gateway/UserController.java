@@ -1,5 +1,6 @@
 package it.decimo.auth_service.controller.gateway;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.decimo.auth_service.connector.userService.UserInformationConnector;
+import it.decimo.auth_service.connector.UserServiceConnector;
 import it.decimo.auth_service.dto.UserInfoDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.repository.UserRepository;
@@ -22,17 +23,12 @@ import lombok.SneakyThrows;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-    private final JwtUtils jwtUtils;
-    private final UserInformationConnector userInformationConnector;
-    private final UserRepository userRepository;
-
-    public UserController(JwtUtils jwtUtils, UserInformationConnector userInformationConnector,
-            UserRepository userRepository) {
-        this.jwtUtils = jwtUtils;
-        this.userInformationConnector = userInformationConnector;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private UserServiceConnector userServiceConnector;
+    @Autowired
+    private UserRepository userRepository;
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ritorna le informazioni dell'utente", content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
@@ -49,7 +45,7 @@ public class UserController {
             final var email = ((String) jwtUtils.extractField(token, "username"));
             idToFind = userRepository.findByEmail(email).get().getId();
         }
-        final var userInfo = userInformationConnector.getUserInfo(idToFind);
+        final var userInfo = userServiceConnector.getUserInfo(idToFind);
         if (userInfo == null) {
             return ResponseEntity.status(404)
                     .body(new BasicResponse("L'utente richiesto non è stato trovato", "USER_NOT_FOUND"));

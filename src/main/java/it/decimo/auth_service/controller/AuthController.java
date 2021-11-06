@@ -2,6 +2,7 @@ package it.decimo.auth_service.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,11 +24,8 @@ import lombok.SneakyThrows;
 @RestController
 @RequestMapping(path = "/api/auth")
 public class AuthController {
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+    @Autowired
+    private AuthService authService;
 
     @PostMapping(value = "/login", produces = { "application/json" })
     @ApiResponses(value = {
