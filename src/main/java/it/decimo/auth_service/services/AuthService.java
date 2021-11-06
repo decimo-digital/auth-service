@@ -83,8 +83,12 @@ public class AuthService {
             return ResponseEntity.status(401)
                     .body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
-
-        user = userRepository.save(user);
+        try {
+            user = userRepository.save(user);
+        } catch (Exception e) {
+            log.error("Error while saving user {}: {}", body.getEmail(), e.getMessage());
+            return ResponseEntity.status(401).body(new BasicResponse("Error while saving user", "ERROR_SAVING_USER"));
+        }
 
         log.info("Registering new user with id {}", user.getId());
         body.setId(user.getId());
