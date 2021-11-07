@@ -35,7 +35,7 @@ public class MerchantServiceConnector {
         if (lat != null && lng != null) {
             builder.append("?lat=" + lat + "&lng=" + lng);
         }
-
+        log.info("Sending request to merchant_service");
         final var response = restTemplate.getForEntity(builder.toString(), List.class);
 
         if (response.getStatusCode() != HttpStatus.OK) {
@@ -44,7 +44,11 @@ public class MerchantServiceConnector {
             return new ArrayList<Merchant>();
         }
 
-        return ((List<Merchant>) response.getBody());
+        final var list = ((List<Merchant>) response.getBody());
+
+        log.info("Received {} elements", list.size());
+
+        return list;
     }
 
     /**
@@ -59,6 +63,8 @@ public class MerchantServiceConnector {
             log.error("Got status code {} from merchant_service on save", response.getStatusCode());
         }
 
+        log.info("Successfully saved the merchant");
+
         return response.getBody();
     }
 
@@ -69,6 +75,7 @@ public class MerchantServiceConnector {
     public boolean updateMerchant(int merchantId, MerchantStatusDto data) {
         try {
             restTemplate.patchForObject(baseUrl + path + "/{id}", data, MerchantData.class, merchantId);
+            log.info("Successfullt patched the requested merchant");
             return true;
         } catch (Exception e) {
             return false;
@@ -86,6 +93,8 @@ public class MerchantServiceConnector {
             log.error("Got status code {} while retrieving merchant data", response.getStatusCode());
             return null;
         }
+
+        log.info("Retrieved merchant data");
 
         return response.getBody();
     }
