@@ -1,22 +1,23 @@
 package it.decimo.auth_service.configs;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.decimo.auth_service.dto.response.BasicResponse;
-import it.decimo.auth_service.services.JwtUtils;
-import it.decimo.auth_service.utils.annotations.NeedLogin;
-import it.decimo.auth_service.utils.exception.ExpiredJWTException;
-import it.decimo.auth_service.utils.exception.InvalidJWTBody;
-import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import it.decimo.auth_service.dto.response.BasicResponse;
+import it.decimo.auth_service.services.JwtUtils;
+import it.decimo.auth_service.utils.annotations.NeedLogin;
+import it.decimo.auth_service.utils.exception.ExpiredJWTException;
+import it.decimo.auth_service.utils.exception.InvalidJWTBody;
+import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 public class SecurityConfig implements WebMvcConfigurer {
@@ -30,8 +31,7 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new JwtInterceptor(jwtUtils, mapper))
-                .addPathPatterns("/**")
+        registry.addInterceptor(new JwtInterceptor(jwtUtils, mapper)).addPathPatterns("/**")
                 .excludePathPatterns("/swagger-ui/**");
     }
 }
@@ -39,9 +39,8 @@ public class SecurityConfig implements WebMvcConfigurer {
 /**
  * Intercetta tutte le chiamate per verificare che il JWT sia valido
  */
+@Slf4j
 class JwtInterceptor implements HandlerInterceptor {
-    private static final Logger logger = LoggerFactory.getLogger(JwtInterceptor.class);
-
     private final JwtUtils jwtUtils;
     private final ObjectMapper mapper;
 
@@ -51,46 +50,48 @@ class JwtInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         if (handler instanceof HandlerMethod) {
             var needLogin = ((HandlerMethod) handler).getMethodAnnotation(NeedLogin.class);
 
             if (needLogin == null) {
-                needLogin = ((HandlerMethod) handler).getMethod().getDeclaringClass()
-                        .getAnnotation(NeedLogin.class);
+                needLogin = ((HandlerMethod) handler).getMethod().getDeclaringClass().getAnnotation(NeedLogin.class);
+            }
+
+            if (needLogin == null) {
+                // Se arriva qua vuol dire che l'annotation NeedLogin non era impostata
+                log.info("Received a request that doesn't need a login");
+                return true;
             }
 
             boolean canContinue = false;
-            if (needLogin != null) {
-                final var headers = request.getHeaders("access-token");
-                if (headers.hasMoreElements()) {
-                    do {
-                        final var header = headers.nextElement();
-                        try {
-                            canContinue = jwtUtils.isJwtValid(header);
-                        } catch (ExpiredJWTException e) {
-                            logger.warn("Sent an expired JWT");
-                        } catch (JWTUsernameNotExistingException e) {
-                            logger.warn("Username in jwt is non-existent");
-                        } catch (InvalidJWTBody e) {
-                            logger.warn("The jwt sent wasn't parsificable");
-                        }
-                        break;
-                    } while (headers.hasMoreElements());
-                }
-            } else {
-                // Se arriva qua vuol dire che l'annotation NeedLogin non era impostata
-                return true;
+
+            final var headers = request.getHeaders("access-token");
+            if (headers.hasMoreElements()) {
+                do {
+                    final var header = headers.nextElement();
+                    try {
+                        canContinue = jwtUtils.isJwtValid(header);
+                    } catch (ExpiredJWTException e) {
+                        log.warn("Sent an expired JWT");
+                    } catch (JWTUsernameNotExistingException e) {
+                        log.warn("Username in jwt is non-existent");
+                    } catch (InvalidJWTBody e) {
+                        log.warn("The jwt sent wasn't parsificable");
+                    }
+                    break;
+                } while (headers.hasMoreElements());
             }
 
             if (!canContinue) {
                 response.setStatus(401);
-                final var message = mapper.writeValueAsString(new BasicResponse("Missing access-token", "NO_ACCESS_TOKEN"));
+                final var message = mapper
+                        .writeValueAsString(new BasicResponse("Missing access-token", "NO_ACCESS_TOKEN"));
                 response.getWriter().print(message);
                 response.setContentLength(message.length());
                 response.setContentType("text/plain");
+                return false;
             }
         }
         return true;

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +22,10 @@ import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
-import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NeedLogin
+//@NeedLogin
 @RestController
 @RequestMapping(value = "/api/merchant")
 public class MerchantController {
@@ -36,7 +36,8 @@ public class MerchantController {
     @GetMapping(produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ritorna la lista di esercenti disponibili. Opzionalmente ordinata", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Merchant.class), minItems = 0, uniqueItems = true))) })
-    public ResponseEntity<Object> findAll(@RequestParam(name = "lat", required = false) Double lat,
+    public ResponseEntity<Object> findAll(@RequestHeader(value = "access-token", required = false) String jwt,
+            @RequestParam(name = "lat", required = false) Double lat,
             @RequestParam(name = "lng", required = false) Double lng) {
         final var merchants = merchantServiceConnector.getMerchants(lat, lng);
         log.info("Received {} merchants from merchant_service", merchants.size());
@@ -52,7 +53,8 @@ public class MerchantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Il merchant è stato salvato", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
             @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class))) })
-    public ResponseEntity<Object> saveItem(@RequestBody Merchant merchant) {
+    public ResponseEntity<Object> saveItem(@RequestHeader(value = "access-token", required = false) String jwt,
+            @RequestBody Merchant merchant) {
         final var id = merchantServiceConnector.saveMerchant(merchant);
         log.info("Saved merchant with id {}", id);
         if (id == null) {
@@ -66,7 +68,9 @@ public class MerchantController {
     @PatchMapping("/{id}")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Il merchant è stato aggiornato"),
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
-    public ResponseEntity<Object> patchMerchantStatus(@PathVariable int id, @RequestBody MerchantStatusDto update) {
+    public ResponseEntity<Object> patchMerchantStatus(
+            @RequestHeader(value = "access-token", required = false) String jwt, @PathVariable int id,
+            @RequestBody MerchantStatusDto update) {
         final var updated = merchantServiceConnector.updateMerchant(id, update);
         log.info("Updated merchant with id {}: {}", id, updated);
         if (!updated) {
@@ -79,7 +83,8 @@ public class MerchantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "I dati del merchant richiesto", content = @Content(schema = @Schema(implementation = MerchantData.class))),
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
-    public ResponseEntity<Object> getMerchantData(@PathVariable int id) {
+    public ResponseEntity<Object> getMerchantData(@RequestHeader(value = "access-token", required = false) String jwt,
+            @PathVariable int id) {
         final var merchantData = merchantServiceConnector.getMerchantData(id);
         log.info("Received merchant data for merchant with id {}", id);
         if (merchantData != null) {

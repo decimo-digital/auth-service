@@ -17,10 +17,10 @@ import it.decimo.auth_service.dto.UserInfoDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.repository.UserRepository;
 import it.decimo.auth_service.services.JwtUtils;
-import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.SneakyThrows;
 
 @RestController
+// @NeedLogin
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
@@ -34,7 +34,6 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Ritorna le informazioni dell'utente", content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
             @ApiResponse(responseCode = "404", description = "L'id inserito non punta a nessun utente esistente", content = @Content(schema = @Schema(implementation = BasicResponse.class))), })
     @GetMapping("/{id}")
-    @NeedLogin
     @SneakyThrows
     public ResponseEntity<Object> getUserInfo(@RequestHeader("access-token") String token,
             @PathVariable("id") String id) {
