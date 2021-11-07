@@ -40,7 +40,12 @@ public class MerchantController {
             @RequestParam(name = "lng", required = false) Double lng) {
         final var merchants = merchantServiceConnector.getMerchants(lat, lng);
         log.info("Received {} merchants from merchant_service", merchants.size());
-        return ResponseEntity.ok().body(merchants);
+        try {
+            return ResponseEntity.ok().body(merchants);
+        } catch (Exception e) {
+            log.error("Error while building response", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping(value = "/", produces = "application/json")
