@@ -22,7 +22,9 @@ import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @NeedLogin
 @RestController
 @RequestMapping(value = "/api/merchant")
@@ -37,6 +39,7 @@ public class MerchantController {
     public ResponseEntity<Object> findAll(@RequestParam(name = "lat", required = false) Double lat,
             @RequestParam(name = "lng", required = false) Double lng) {
         final var merchants = merchantServiceConnector.getMerchants(lat, lng);
+        log.info("Received {} merchants from merchant_service", merchants.size());
         return ResponseEntity.ok().body(merchants);
     }
 
@@ -46,6 +49,7 @@ public class MerchantController {
             @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class))) })
     public ResponseEntity<Object> saveItem(@RequestBody Merchant merchant) {
         final var id = merchantServiceConnector.saveMerchant(merchant);
+        log.info("Saved merchant with id {}", id);
         if (id == null) {
             return ResponseEntity.internalServerError()
                     .body(new BasicResponse("C'è stato qualche errore a salvare il merchant", "GENERIC_ERROR"));
@@ -59,6 +63,7 @@ public class MerchantController {
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
     public ResponseEntity<Object> patchMerchantStatus(@PathVariable int id, @RequestBody MerchantStatusDto update) {
         final var updated = merchantServiceConnector.updateMerchant(id, update);
+        log.info("Updated merchant with id {}: {}", id, updated);
         if (!updated) {
             return ResponseEntity.notFound().build();
         }
@@ -71,6 +76,7 @@ public class MerchantController {
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
     public ResponseEntity<Object> getMerchantData(@PathVariable int id) {
         final var merchantData = merchantServiceConnector.getMerchantData(id);
+        log.info("Received merchant data for merchant with id {}", id);
         if (merchantData != null) {
             return ResponseEntity.notFound().build();
         }
