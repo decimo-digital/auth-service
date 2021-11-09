@@ -7,6 +7,7 @@ app:
   connectors:
     userServiceBaseUrl: ${USER_SERVICE_HOST:"user_service:8080"}
     merchantServiceBaseUrl: ${MERCHANT_SERVICE_HOST:"merchant_service:8080"}
+    prenotationServiceBaseUrl: ${PRENOTATION_SERVICE_HOST:"prenotation_service:8080"}
 
 spring:
   datasource:
