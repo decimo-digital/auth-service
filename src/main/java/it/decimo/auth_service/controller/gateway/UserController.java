@@ -17,10 +17,11 @@ import it.decimo.auth_service.dto.UserInfoDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.repository.UserRepository;
 import it.decimo.auth_service.services.JwtUtils;
+import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.SneakyThrows;
 
 @RestController
-// @NeedLogin
+@NeedLogin
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired

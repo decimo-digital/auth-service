@@ -22,10 +22,11 @@ import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
+import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@NeedLogin
+@NeedLogin
 @RestController
 @RequestMapping(value = "/api/merchant")
 public class MerchantController {

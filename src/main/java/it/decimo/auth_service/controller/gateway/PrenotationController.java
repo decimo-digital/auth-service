@@ -17,10 +17,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.decimo.auth_service.connector.PrenotationServiceConnector;
 import it.decimo.auth_service.dto.PrenotationRequestDto;
 import it.decimo.auth_service.dto.UserPrenotation;
+import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/prenotation")
+@NeedLogin
 @Slf4j
 public class PrenotationController {
     @Autowired
