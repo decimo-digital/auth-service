@@ -13,6 +13,5 @@ public class RegistrationDto {
     private String lastName;
     private String phone;
     private String email;
-    private String propic;
     private String password;
 }
