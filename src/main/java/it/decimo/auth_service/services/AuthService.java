@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import it.decimo.auth_service.connector.UserServiceConnector;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -23,8 +22,6 @@ public class AuthService {
     private UserRepository userRepository;
     @Autowired
     private JwtUtils jwtUtils;
-    @Autowired
-    private UserServiceConnector registrationConnector;
 
     /**
      * Wrapper per i metodi di autologin e di login con credenziali
@@ -90,18 +87,9 @@ public class AuthService {
             return ResponseEntity.status(401).body(new BasicResponse("Error while saving user", "ERROR_SAVING_USER"));
         }
 
-        log.info("Registering new user with id {}", user.getId());
-        body.setId(user.getId());
-        if (registrationConnector.register(body)) {
-            final var jwt = jwtUtils.generateJwt(LoginBody.builder().username(body.getEmail()).build());
+        final String jwt = jwtUtils.generateJwt(LoginBody.builder().username(user.getEmail()).build());
 
-            return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
-        } else {
-            userRepository.deleteById(body.getId());
-
-            return ResponseEntity.badRequest()
-                    .body(new BasicResponse("Something went wrong with the registration", "REGISTRATION_FAILED"));
-        }
+        return ResponseEntity.ok(LoginResponse.builder().accessToken(jwt).build());
     }
 
     /**
