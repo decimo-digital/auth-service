@@ -2,6 +2,7 @@ package it.decimo.auth_service.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +21,7 @@ import it.decimo.auth_service.services.AuthService;
 import lombok.SneakyThrows;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/auth")
 public class AuthController {
     @Autowired

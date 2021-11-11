@@ -2,6 +2,7 @@ package it.decimo.auth_service.controller.gateway;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -23,6 +24,7 @@ import lombok.SneakyThrows;
 @RestController
 @NeedLogin
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private JwtUtils jwtUtils;
