@@ -24,6 +24,8 @@ public class Merchant {
 
     private Double distance;
 
+    private MerchantData data;
+
     @JsonAnyGetter
     public Map<String, Double> getStoreLocation() {
         return new HashMap<String, Double>() {

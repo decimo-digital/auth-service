@@ -57,7 +57,6 @@ public class MerchantServiceConnector {
      * @return L'entità salvata sul db
      */
     public Merchant saveMerchant(Merchant toSave) {
-
         final var response = restTemplate.postForEntity(baseUrl + path, toSave, Merchant.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.error("Got status code {} from merchant_service on save", response.getStatusCode());
@@ -85,10 +84,10 @@ public class MerchantServiceConnector {
     /**
      * Ritorna i dati del merchant richiesto
      */
-    public MerchantData getMerchantData(int id) {
+    public Merchant getMerchant(int id) {
         final var url = baseUrl + path + "/{id}/data";
 
-        final var response = restTemplate.getForEntity(url, MerchantData.class, id);
+        final var response = restTemplate.getForEntity(url, Merchant.class, id);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.error("Got status code {} while retrieving merchant data", response.getStatusCode());
             return null;

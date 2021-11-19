@@ -84,15 +84,15 @@ public class MerchantController {
 
     @GetMapping("/{id}/data")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "I dati del merchant richiesto", content = @Content(schema = @Schema(implementation = MerchantData.class))),
+            @ApiResponse(responseCode = "200", description = "I dati del merchant richiesto", content = @Content(schema = @Schema(implementation = Merchant.class))),
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
     public ResponseEntity<Object> getMerchantData(@RequestHeader(value = "access-token", required = false) String jwt,
             @PathVariable int id) {
-        final var merchantData = merchantServiceConnector.getMerchantData(id);
+        final var merchant = merchantServiceConnector.getMerchant(id);
         log.info("Received merchant data for merchant with id {}", id);
-        if (merchantData != null) {
+        if (merchant != null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(merchantData);
+        return ResponseEntity.ok(merchant);
     }
 }
