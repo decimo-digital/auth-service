@@ -44,6 +44,6 @@ public class Merchant {
 
     private String storeName;
 
-    private Integer userOwner;
+    private Integer owner;
 
 }

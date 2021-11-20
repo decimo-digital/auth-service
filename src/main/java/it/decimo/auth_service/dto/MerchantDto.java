@@ -19,7 +19,7 @@ public class MerchantDto {
         this.storeLocation = merchant.getPoint();
         this.distance = merchant.getDistance();
         this.storeName = merchant.getStoreName();
-        this.owner = merchant.getUserOwner();
+        this.owner = merchant.getOwner();
         this.data = data;
     }
 
