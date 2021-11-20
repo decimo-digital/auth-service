@@ -58,13 +58,14 @@ public class MerchantController {
             @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class))) })
     public ResponseEntity<Object> saveItem(@RequestHeader(value = "access-token", required = false) String jwt,
             @RequestBody Merchant merchant) {
-        final var id = merchantServiceConnector.saveMerchant(merchant);
-        log.info("Saved merchant with id {}", id);
-        if (id == null) {
+        final var saved = merchantServiceConnector.saveMerchant(merchant);
+        if (!saved) {
+            log.error("Failed to save merchant");
             return ResponseEntity.internalServerError()
                     .body(new BasicResponse("C'è stato qualche errore a salvare il merchant", "GENERIC_ERROR"));
         } else {
-            return ResponseEntity.ok().body(BasicResponse.builder().message(id.toString()).code("OK").build());
+            log.info("Saved merchant");
+            return ResponseEntity.ok().body(BasicResponse.builder().code("OK").build());
         }
     }
 

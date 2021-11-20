@@ -57,15 +57,15 @@ public class MerchantServiceConnector {
      * 
      * @return L'entità salvata sul db
      */
-    public Integer saveMerchant(Merchant toSave) {
-        final var response = restTemplate.postForEntity(baseUrl + path, toSave, Integer.class);
+    public boolean saveMerchant(Merchant toSave) {
+        final var response = restTemplate.postForEntity(baseUrl + path, toSave, Object.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.error("Got status code {} from merchant_service on save", response.getStatusCode());
+            return false;
         }
 
         log.info("Successfully saved the merchant");
-
-        return response.getBody();
+        return true;
     }
 
     /**
