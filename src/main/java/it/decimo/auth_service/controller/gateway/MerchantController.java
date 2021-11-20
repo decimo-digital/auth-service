@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.MerchantServiceConnector;
 import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantData;
+import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
@@ -84,7 +85,7 @@ public class MerchantController {
 
     @GetMapping("/{id}/data")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "I dati del merchant richiesto", content = @Content(schema = @Schema(implementation = Merchant.class))),
+            @ApiResponse(responseCode = "200", description = "I dati del merchant richiesto", content = @Content(schema = @Schema(implementation = MerchantDto.class))),
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
     public ResponseEntity<Object> getMerchantData(@RequestHeader(value = "access-token", required = false) String jwt,
             @PathVariable int id) {

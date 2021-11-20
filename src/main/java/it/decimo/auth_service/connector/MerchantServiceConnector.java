@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantData;
+import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,10 +85,10 @@ public class MerchantServiceConnector {
     /**
      * Ritorna i dati del merchant richiesto
      */
-    public Merchant getMerchant(int id) {
+    public MerchantDto getMerchant(int id) {
         final var url = baseUrl + path + "/{id}/data";
 
-        final var response = restTemplate.getForEntity(url, Merchant.class, id);
+        final var response = restTemplate.getForEntity(url, MerchantDto.class, id);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.error("Got status code {} while retrieving merchant data", response.getStatusCode());
             return null;
