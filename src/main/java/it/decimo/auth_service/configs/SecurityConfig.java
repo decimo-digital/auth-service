@@ -61,7 +61,6 @@ class JwtInterceptor implements HandlerInterceptor {
 
             if (needLogin == null) {
                 // Se arriva qua vuol dire che l'annotation NeedLogin non era impostata
-                log.info("Received a request that doesn't need a login");
                 return true;
             }
 

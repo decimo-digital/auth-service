@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.MerchantServiceConnector;
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;

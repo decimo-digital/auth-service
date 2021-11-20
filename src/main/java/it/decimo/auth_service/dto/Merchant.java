@@ -45,5 +45,4 @@ public class Merchant {
     private String storeName;
 
     private Integer owner;
-
 }
