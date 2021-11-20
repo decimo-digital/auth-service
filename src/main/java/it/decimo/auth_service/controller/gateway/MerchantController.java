@@ -104,7 +104,7 @@ public class MerchantController {
             @PathVariable int id) {
         final var merchant = merchantServiceConnector.getMerchant(id);
         log.info("Received merchant data for merchant with id {}", id);
-        if (merchant != null) {
+        if (merchant == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(merchant);
