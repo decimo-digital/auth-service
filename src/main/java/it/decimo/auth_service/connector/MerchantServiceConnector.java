@@ -78,6 +78,7 @@ public class MerchantServiceConnector {
             log.info("Successfullt patched the requested merchant");
             return true;
         } catch (Exception e) {
+            log.error("Failed to update merchant status", e);
             return false;
         }
     }
