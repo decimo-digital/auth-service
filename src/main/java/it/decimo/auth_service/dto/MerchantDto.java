@@ -3,6 +3,8 @@ package it.decimo.auth_service.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.springframework.data.geo.Point;
 
 import lombok.AllArgsConstructor;
@@ -14,15 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MerchantDto {
 
-    public MerchantDto(Merchant merchant, MerchantData data) {
-        this.id = merchant.getId();
-        this.storeLocation = merchant.getPoint();
-        this.distance = merchant.getDistance();
-        this.storeName = merchant.getStoreName();
-        this.owner = merchant.getOwner();
-        this.data = data;
-    }
-
     private Integer id;
 
     private Point storeLocation;
@@ -31,15 +24,16 @@ public class MerchantDto {
      * Contiene la distanza che viene calcolata al momento della query per ciascun
      * client
      */
-
     private Double distance;
 
-    private MerchantData data;
+    private int freeSeats;
+    private int totalSeats;
 
     public Point getPoint() {
         return storeLocation;
     }
 
+    @JsonIgnore
     public Map<String, Double> getStoreLocation() {
         return new HashMap<String, Double>() {
             {
