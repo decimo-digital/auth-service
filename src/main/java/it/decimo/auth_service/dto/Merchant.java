@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.data.geo.Point;
 
@@ -34,6 +35,7 @@ public class Merchant {
         };
     }
 
+    @JsonIgnore
     public Point getPoint() {
         return storeLocation;
     }

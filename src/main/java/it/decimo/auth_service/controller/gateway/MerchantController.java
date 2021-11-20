@@ -23,7 +23,10 @@ import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
+import it.decimo.auth_service.repository.UserRepository;
+import it.decimo.auth_service.services.JwtUtils;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,6 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 public class MerchantController {
 
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private MerchantServiceConnector merchantServiceConnector;
 
@@ -56,8 +63,14 @@ public class MerchantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Il merchant è stato salvato", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
             @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class))) })
+    @SneakyThrows
     public ResponseEntity<Object> saveItem(@RequestHeader(value = "access-token", required = false) String jwt,
             @RequestBody Merchant merchant) {
+        final var username = ((String) jwtUtils.extractField(jwt, "username"));
+
+        final var id = userRepository.findByEmail(username).get().getId();
+        merchant.setOwner(id);
+
         final var saved = merchantServiceConnector.saveMerchant(merchant);
         if (!saved) {
             log.error("Failed to save merchant");
