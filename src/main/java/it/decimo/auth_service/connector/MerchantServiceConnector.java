@@ -74,7 +74,7 @@ public class MerchantServiceConnector {
      */
     public boolean updateMerchant(int merchantId, MerchantStatusDto data) {
         try {
-            restTemplate.patchForObject(baseUrl + path + "/{id}", data, MerchantData.class, merchantId);
+            restTemplate.postForEntity(baseUrl + path + "/{id}/update", data, Object.class, merchantId);
             log.info("Successfullt patched the requested merchant");
             return true;
         } catch (Exception e) {
