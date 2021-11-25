@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import lombok.extern.slf4j.Slf4j;

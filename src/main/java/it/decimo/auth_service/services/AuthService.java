@@ -13,6 +13,7 @@ import it.decimo.auth_service.repository.UserRepository;
 import it.decimo.auth_service.utils.exception.ExpiredJWTException;
 import it.decimo.auth_service.utils.exception.InvalidJWTBody;
 import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -22,6 +23,18 @@ public class AuthService {
     private UserRepository userRepository;
     @Autowired
     private JwtUtils jwtUtils;
+
+    /**
+     * Recupera l'id dell'utente che ha inviato la richiesta
+     * 
+     * @param jwt Il JWT per l'autorizzazione della richiesta
+     * @return L'id dell'utente corrispondente
+     */
+    @SneakyThrows
+    public int getIdFromJwt(String jwt) {
+        final var email = ((String) jwtUtils.extractField(jwt, "username"));
+        return userRepository.findByEmail(email).get().getId();
+    }
 
     /**
      * Wrapper per i metodi di autologin e di login con credenziali

@@ -23,8 +23,7 @@ import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.MerchantDto;
 import it.decimo.auth_service.dto.MerchantStatusDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
-import it.decimo.auth_service.repository.UserRepository;
-import it.decimo.auth_service.services.JwtUtils;
+import it.decimo.auth_service.services.AuthService;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(value = "/api/merchant")
 @CrossOrigin(origins = "*")
 public class MerchantController {
-
     @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private UserRepository userRepository;
+    private AuthService authService;
     @Autowired
     private MerchantServiceConnector merchantServiceConnector;
 
@@ -66,9 +62,7 @@ public class MerchantController {
     @SneakyThrows
     public ResponseEntity<Object> saveItem(@RequestHeader(value = "access-token", required = false) String jwt,
             @RequestBody Merchant merchant) {
-        final var username = ((String) jwtUtils.extractField(jwt, "username"));
-
-        final var id = userRepository.findByEmail(username).get().getId();
+        final var id = authService.getIdFromJwt(jwt);
         merchant.setOwner(id);
 
         final var saved = merchantServiceConnector.saveMerchant(merchant);

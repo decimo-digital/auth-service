@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -21,8 +22,7 @@ import it.decimo.auth_service.connector.PrenotationServiceConnector;
 import it.decimo.auth_service.dto.PrenotationRequestDto;
 import it.decimo.auth_service.dto.UserPrenotation;
 import it.decimo.auth_service.dto.response.BasicResponse;
-import it.decimo.auth_service.repository.UserRepository;
-import it.decimo.auth_service.services.JwtUtils;
+import it.decimo.auth_service.services.AuthService;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,21 +35,22 @@ public class PrenotationController {
     @Autowired
     private PrenotationServiceConnector prenotationServiceConnector;
     @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private UserRepository userrepository;
+    private AuthService authService;
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<Object> createPrenotation(@RequestHeader("access-token") String jwt,
             @RequestBody PrenotationRequestDto prenotationRequest) {
         log.info("Sending prenotation request: {}", prenotationRequest.toString());
         return prenotationServiceConnector.makePrenotation(prenotationRequest);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping()
     @ApiResponse(responseCode = "200", description = "Lista delle prenotazioni effettuate", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserPrenotation.class), minItems = 0, uniqueItems = true)))
     public ResponseEntity<Object> getUserPrenotations(@RequestHeader("access-token") String jwt,
-            @PathVariable(name = "userId") int requesterId) {
+            @RequestParam(name = "userId", required = false) Integer requesterId) {
+        if (requesterId == null) {
+            requesterId = authService.getIdFromJwt(jwt);
+        }
         final var prenotations = prenotationServiceConnector.getPrenotations(requesterId);
         return ResponseEntity.ok().body(prenotations);
     }
@@ -63,9 +64,7 @@ public class PrenotationController {
     public ResponseEntity<Object> addUserToPrenotation(@RequestHeader("access-token") String jwt,
             @Param(value = "prenotationId") int prenotationId, @PathVariable int userId) {
         try {
-
-            final var username = ((String) jwtUtils.extractField(jwt, "username"));
-            final var requesterId = userrepository.findByEmail(username).get().getId();
+            final var requesterId = authService.getIdFromJwt(jwt);
 
             return prenotationServiceConnector.addUserToPrenotation(requesterId, prenotationId, userId);
         } catch (Exception e) {
