@@ -47,7 +47,7 @@ public class UserController {
             idToFind = authService.getIdFromJwt(token);
         }
 
-        log.info("Getting info of user {}", email);
+        log.info("Getting info of user {}", idToFind);
         final var userInfo = userServiceConnector.getUserInfo(idToFind);
         if (userInfo == null) {
             return ResponseEntity.status(404)
