@@ -17,5 +17,6 @@ spring:
   jpa:
     properties:
       hibernate:
+        ddl-auto: update
         id:
           new_generator_mappings: false
