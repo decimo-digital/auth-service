@@ -58,4 +58,18 @@ public class PrenotationServiceConnector {
         return restTemplate.postForEntity(url, null, Object.class);
     }
 
+    /**
+     * Aggiorna una prenotazione
+     */
+    public ResponseEntity<Object> updatePrenotation(int requesterId, Prenotation prenotation) {
+        try {
+            final var url = baseUrl + path + "?userId=" + requesterId;
+            restTemplate.patchForObject(url, prenotation, Object.class);
+            return ResponseEntity.ok()
+                    .build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+
+        }
+    }
 }

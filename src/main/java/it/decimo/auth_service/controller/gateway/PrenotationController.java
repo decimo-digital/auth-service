@@ -5,6 +5,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.PrenotationServiceConnector;
+import it.decimo.auth_service.dto.Prenotation;
 import it.decimo.auth_service.dto.PrenotationRequestDto;
 import it.decimo.auth_service.dto.UserPrenotation;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -67,6 +69,21 @@ public class PrenotationController {
             final var requesterId = authService.getIdFromJwt(jwt);
 
             return prenotationServiceConnector.addUserToPrenotation(requesterId, prenotationId, userId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La prenotazione è stata modificata con successo", content = @Content(schema = @Schema(implementation = Prenotation.class))),
+            @ApiResponse(responseCode = "404", description = "La prenotazione non esiste", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "401", description = "L'utente non può modificare la prenotazione", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+    })
+    public ResponseEntity<Object> editPrenotation(@RequestHeader(name = "userId") int requesterId,
+            @RequestBody Prenotation prenotation) {
+        try {
+            return prenotationServiceConnector.updatePrenotation(requesterId, prenotation);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

@@ -35,6 +35,8 @@ public class Prenotation {
 
     private int amount;
 
+    private boolean enabled;
+
     @JsonAlias("type")
     private boolean isValid;
 
