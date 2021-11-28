@@ -33,6 +33,13 @@ public class AuthService {
     @SneakyThrows
     public int getIdFromJwt(String jwt) {
         final var email = ((String) jwtUtils.extractField(jwt, "username"));
+        return getIdFromEmail(email);
+    }
+
+    /**
+     * Ritorna l'id collegato all'email
+     */
+    public int getIdFromEmail(String email) {
         return userRepository.findByEmail(email).get().getId();
     }
 

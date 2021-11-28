@@ -38,16 +38,16 @@ public class UserController {
     @GetMapping()
     @SneakyThrows
     public ResponseEntity<Object> getUserInfo(@RequestHeader("access-token") String token,
-            @RequestParam(value = "id", required = false) String id) {
+            @RequestParam(value = "id", required = false) String email) {
 
         int idToFind;
         try {
-            idToFind = Integer.parseInt(id);
+            idToFind = authService.getIdFromEmail(email);
         } catch (Exception ignored) {
             idToFind = authService.getIdFromJwt(token);
         }
 
-        log.info("Getting info of user {}", id);
+        log.info("Getting info of user {}", email);
         final var userInfo = userServiceConnector.getUserInfo(idToFind);
         if (userInfo == null) {
             return ResponseEntity.status(404)
