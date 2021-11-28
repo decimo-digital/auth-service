@@ -80,8 +80,9 @@ public class PrenotationController {
             @ApiResponse(responseCode = "404", description = "La prenotazione non esiste", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
             @ApiResponse(responseCode = "401", description = "L'utente non può modificare la prenotazione", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
     })
-    public ResponseEntity<Object> editPrenotation(@RequestHeader(name = "userId") int requesterId,
+    public ResponseEntity<Object> editPrenotation(@RequestHeader("access-token") String jwt,
             @RequestBody Prenotation prenotation) {
+        final var requesterId = authService.getIdFromJwt(jwt);
         try {
             return prenotationServiceConnector.updatePrenotation(requesterId, prenotation);
         } catch (Exception e) {
