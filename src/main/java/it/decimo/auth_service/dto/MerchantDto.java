@@ -29,6 +29,8 @@ public class MerchantDto {
     private int freeSeats;
     private int totalSeats;
 
+    private String description;
+
     public Point getPoint() {
         return storeLocation;
     }
