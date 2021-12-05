@@ -27,6 +27,9 @@ public class Merchant {
 
     @JsonAnyGetter
     public Map<String, Double> getStoreLocation() {
+        if (storeLocation == null) {
+            return new HashMap<>();
+        }
         return new HashMap<String, Double>() {
             {
                 put("lat", storeLocation.getX());
@@ -47,4 +50,9 @@ public class Merchant {
     private String storeName;
 
     private Integer owner;
+
+    private Integer freeSeats;
+    private Integer totalSeats;
+
+    private double occupancyRate;
 }
