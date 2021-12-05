@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.MerchantServiceConnector;
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantStatusDto;
+import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.services.AuthService;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
@@ -57,7 +57,8 @@ public class MerchantController {
     @PostMapping(value = "/", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Il merchant è stato salvato", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class))) })
+            @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class)))
+    })
     @SneakyThrows
     public ResponseEntity<Object> saveItem(@RequestHeader(value = "access-token", required = false) String jwt,
             @RequestBody Merchant merchant) {
@@ -76,12 +77,14 @@ public class MerchantController {
     }
 
     @PatchMapping("/{id}")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Il merchant è stato aggiornato"),
-            @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste") })
-    public ResponseEntity<Object> patchMerchantStatus(
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Il merchant è stato aggiornato"),
+            @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste")
+    })
+    public ResponseEntity<Object> patchMerchantData(
             @RequestHeader(value = "access-token", required = false) String jwt, @PathVariable int id,
-            @RequestBody MerchantStatusDto update) {
-        final var updated = merchantServiceConnector.updateMerchant(id, update);
+            @RequestBody MerchantData update) {
+        final var updated = merchantServiceConnector.updateMerchantData(id, update);
         log.info("Updated merchant with id {}: {}", id, updated);
         if (!updated) {
             return ResponseEntity.notFound().build();

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantStatusDto;
+import it.decimo.auth_service.dto.MerchantData;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -68,7 +68,7 @@ public class MerchantServiceConnector {
      * Aggiorna i dati relativi al {@link Merchant} il cui id è passato come
      * parametro
      */
-    public boolean updateMerchant(int merchantId, MerchantStatusDto data) {
+    public boolean updateMerchantData(int merchantId, MerchantData data) {
         try {
             restTemplate.postForEntity(baseUrl + path + "/{id}/update", data, Object.class, merchantId);
             log.info("Successfullt patched the requested merchant");

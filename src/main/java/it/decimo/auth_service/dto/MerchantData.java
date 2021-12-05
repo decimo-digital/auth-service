@@ -1,5 +1,7 @@
 package it.decimo.auth_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,12 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MerchantData {
 
+    @JsonAlias("merchant_id")
     private int merchantId;
 
-    // @Column(name = "openings")
-    // private String openings;
-
-    private int freeSeats;
-
+    @JsonAlias("total_seats")
     private int totalSeats;
+
+    private String description;
 }

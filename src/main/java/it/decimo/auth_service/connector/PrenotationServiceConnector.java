@@ -65,10 +65,9 @@ public class PrenotationServiceConnector {
      */
     public ResponseEntity<Object> updatePrenotation(int requesterId, Prenotation prenotation) {
         try {
-            final var url = baseUrl + path + "?userId=" + requesterId;
-            restTemplate.patchForObject(url, prenotation, Object.class);
-            return ResponseEntity.ok()
-                    .build();
+            final var url = baseUrl + path + "/update?userId=" + requesterId;
+            restTemplate.postForObject(url, prenotation, Object.class);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
 
