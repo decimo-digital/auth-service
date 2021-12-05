@@ -1,11 +1,9 @@
 package it.decimo.auth_service.connector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -38,16 +36,20 @@ public class PrenotationServiceConnector {
     /**
      * Ritorna la lista di prenotazioni dell'utente
      */
-    public List<Prenotation> getPrenotations(int userId) {
+    public ResponseEntity<List> getPrenotations(int userId) {
         final var response = restTemplate.getForEntity(baseUrl + path + "/" + userId, List.class);
 
-        if (response.getStatusCode() != HttpStatus.OK) {
-            return new ArrayList<Prenotation>();
-        }
-        final var list = ((List<Prenotation>) response.getBody());
+        final var list = response.getBody();
 
         log.info("Received {} prenotations", list.size());
-        return list;
+        return response;
+    }
+
+    public ResponseEntity<List> getPrenotationsForMerchant(int merchantId, int requesterId) {
+        final var response = restTemplate
+                .getForEntity(baseUrl + path + "/" + merchantId + "/prenotations?userId=" + requesterId, List.class);
+        log.info("Received {} prenotations for merchant {}", response.getBody().size(), merchantId);
+        return response;
     }
 
     /**

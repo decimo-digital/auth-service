@@ -2,6 +2,7 @@ package it.decimo.auth_service.controller.gateway;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,7 +55,29 @@ public class PrenotationController {
             requesterId = authService.getIdFromJwt(jwt);
         }
         final var prenotations = prenotationServiceConnector.getPrenotations(requesterId);
-        return ResponseEntity.ok().body(prenotations);
+
+        if (prenotations.getStatusCode() == HttpStatus.OK) {
+            return ResponseEntity.ok(prenotations.getBody());
+        }
+
+        return ResponseEntity.status(prenotations.getStatusCode()).body(prenotations.getBody());
+    }
+
+    @GetMapping("/{merchantId}/prenotations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista delle prenotazioni effettuate", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Prenotation.class), minItems = 0, uniqueItems = true))),
+            @ApiResponse(responseCode = "404", description = "Non è stato trovato il locale richiesto", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "401", description = "L'utente richiedente non ha i permessi necessari per la risorsa", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+    })
+    public ResponseEntity<Object> getPrenotations(@PathVariable(name = "merchantId") int merchantId,
+            @RequestHeader("access-token") String jwt) {
+        int requesterId = authService.getIdFromJwt(jwt);
+        final var response = prenotationServiceConnector.getPrenotationsForMerchant(merchantId, requesterId);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return ResponseEntity.ok(response.getBody());
+        }
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     @PostMapping("/{prenotationId}")
@@ -67,7 +90,6 @@ public class PrenotationController {
             @Param(value = "prenotationId") int prenotationId, @PathVariable int userId) {
         try {
             final var requesterId = authService.getIdFromJwt(jwt);
-
             return prenotationServiceConnector.addUserToPrenotation(requesterId, prenotationId, userId);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
