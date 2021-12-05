@@ -52,6 +52,7 @@ public class AuthService {
      */
     public ResponseEntity<Object> login(String jwt, LoginBody body) {
         if (jwt == null && body == null) {
+            log.error("Missing both jwt and credentials");
             return ResponseEntity.badRequest().build();
         }
         if (jwt != null) {
