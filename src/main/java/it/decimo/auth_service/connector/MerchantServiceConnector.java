@@ -1,17 +1,16 @@
 package it.decimo.auth_service.connector;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import it.decimo.auth_service.dto.Merchant;
+import it.decimo.auth_service.dto.MerchantData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantData;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -50,7 +49,7 @@ public class MerchantServiceConnector {
 
     /**
      * Salva l'esercente passato come parametro
-     * 
+     *
      * @return L'entità salvata sul db
      */
     public boolean saveMerchant(Merchant toSave) {
@@ -94,5 +93,19 @@ public class MerchantServiceConnector {
         log.info("Retrieved merchant data");
 
         return response.getBody();
+    }
+
+    /**
+     * Elimina il merchant richiesto
+     */
+    public boolean deleteMerchant(int merchantId, int requesterId) {
+        try {
+            final var url = baseUrl + path + "/merchantId?requester=" + requesterId;
+            restTemplate.delete(url, merchantId);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to delete merchant", e);
+            return false;
+        }
     }
 }
