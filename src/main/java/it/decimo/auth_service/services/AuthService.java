@@ -1,11 +1,7 @@
 package it.decimo.auth_service.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import it.decimo.auth_service.dto.GoogleTokenDto;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -22,10 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
 
 @Service
 @Slf4j
@@ -158,50 +150,39 @@ public class AuthService {
     }
 
     /**
-     * @param tokenId Il token da utilizzare per l'accesso
+     * @param tokenDto Il token da utilizzare per l'accesso
      * @return L'access-token per autenticare le chiamate successive
-     * @throws JsonProcessingException se fallisce il recupero dei certificati di google per garantire l'integrità del tokenId
      */
-    public LoginResponse googleSignIn(String tokenId) throws IOException, GeneralSecurityException {
-        try {
-            final var transport = new NetHttpTransport();
-            final var factory = new GsonFactory();
+    public LoginResponse googleSignIn(GoogleTokenDto tokenDto) {
 
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory).setAudience(Collections.singletonList(googleClientId)).build();
-            log.info("Verifying google token {}", tokenId);
-            GoogleIdToken token = verifier.verify(tokenId);
-            AuthUser registeredUser;
-            if (token != null) {
-                log.info("Received valid token");
-                GoogleIdToken.Payload payload = token.getPayload();
-                String userId = payload.getSubject();
-                String email = payload.getEmail();
-                String name = (String) payload.get("name");
-                String familyName = (String) payload.get("family_name");
-
-                final var user = AuthUser.builder().email(email).firstName(name).lastName(familyName).googleId(userId).build();
-                log.info("Created user from token: {}", email);
-                final var savedUser = userRepository.findByEmail(user.getEmail());
-
-                if (savedUser.isEmpty()) {
-                    log.info("Registering {}", user.getEmail());
-                    registeredUser = userRepository.save(user);
-                } else {
-                    log.info("User {} already registered", user.getEmail());
-                    registeredUser = savedUser.get();
-                }
-            } else {
-                log.error("Received id token is not valid");
+        final var existentUser = userRepository.findByEmail(tokenDto.getEmail());
+        if (existentUser.isEmpty()) {
+            log.info("Received a new user, registering {}", tokenDto.getEmail());
+            var user = AuthUser.builder()
+                    .firstName(tokenDto.getFirstName())
+                    .lastName(tokenDto.getLastName())
+                    .email(tokenDto.getEmail())
+                    .googleId(tokenDto.getGoogleId())
+                    .build();
+            return generateLoginResponse(userRepository.save(user));
+        } else {
+            if (!existentUser.get().getGoogleId().equals(tokenDto.getGoogleId())) {
+                log.error("User {} has sent a different google token", tokenDto.getEmail());
                 return null;
             }
-
-            final var accessToken = jwtUtils.generateJwt(LoginBody.builder().username(registeredUser.getEmail()).build());
-            log.info("Generated jwt for user {}", registeredUser.getEmail());
-            return LoginResponse.builder().accessToken(accessToken).build();
-        } catch (Exception e) {
-            log.error("Error while logging in with google: {}", e.getMessage());
-            return null;
+            return generateLoginResponse(existentUser.get());
         }
     }
 
+    /**
+     * Crea il LoginResponse per l'utente passato
+     *
+     * @param user L'utente per il quale generare l'access-token
+     * @return L'access-token per l'utente
+     */
+    private LoginResponse generateLoginResponse(AuthUser user) {
+        final var accessToken = jwtUtils.generateJwt(LoginBody.builder().username(user.getEmail()).build());
+        log.info("Generated jwt for user {}", user.getEmail());
+        return LoginResponse.builder().accessToken(accessToken).build();
+    }
 }

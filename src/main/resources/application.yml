@@ -11,7 +11,7 @@ app:
 
 google:
   client:
-    id: ${GOOGLE_CLIENT_ID:"531289078330-k61rsekikad4c5l3i7oaq44sagcj1e9l.apps.googleusercontent.com"}
+    id: ${GOOGLE_CLIENT_ID:531289078330-k61rsekikad4c5l3i7oaq44sagcj1e9l.apps.googleusercontent.com}
 
 spring:
   datasource:

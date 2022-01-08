@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import it.decimo.auth_service.dto.GoogleTokenDto;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -47,7 +48,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "Il login è andato bene"),
     })
-    public ResponseEntity<Object> googleSignIn(@RequestBody String tokenId) {
+    public ResponseEntity<Object> googleSignIn(@RequestBody GoogleTokenDto tokenId) {
         try {
             final var response = authService.googleSignIn(tokenId);
             if (response == null) {
