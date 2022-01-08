@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.MenuConnector;
+import it.decimo.auth_service.dto.MenuCategory;
 import it.decimo.auth_service.dto.MenuItem;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.services.AuthService;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -37,6 +40,14 @@ public class MenuController {
             log.error("Failed to send request to getMenu", e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/categories")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ritorna la lista di categorie per i piatti del menu", content = @Content(array = @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(implementation = MenuCategory.class))))
+    })
+    public List<MenuCategory> getCategories() {
+        return menuConnector.getCategories();
     }
 
     @ApiResponses(value = {

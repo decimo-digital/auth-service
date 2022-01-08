@@ -1,5 +1,6 @@
 package it.decimo.auth_service.connector;
 
+import it.decimo.auth_service.dto.MenuCategory;
 import it.decimo.auth_service.dto.MenuItem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,5 +65,12 @@ public class MenuConnector {
         } catch (Exception e) {
             log.error("Failed to delete menu item: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Recupera tutte le categorie di piatti possibili
+     */
+    public List<MenuCategory> getCategories() {
+        return restTemplate.getForObject((baseUrl + path + "/categories").replace("{id}", "0"), List.class);
     }
 }
