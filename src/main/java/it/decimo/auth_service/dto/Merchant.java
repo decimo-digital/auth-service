@@ -24,6 +24,8 @@ public class Merchant {
     private Point storeLocation;
 
     private Double distance;
+    
+    private String cuisineType;
 
     @JsonAnyGetter
     public Map<String, Double> getStoreLocation() {
