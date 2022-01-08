@@ -1,0 +1,68 @@
+package it.decimo.auth_service.connector;
+
+import it.decimo.auth_service.dto.MenuItem;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
+
+@Component
+@Slf4j
+public class MenuConnector {
+
+    @Value("${app.connectors.merchantServiceBaseUrl}")
+    private String baseUrl;
+
+    private String path = "/api/merchant/{id}/menu";
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    /**
+     * Recupera il menu del merchant
+     *
+     * @param merchantId Il merchant di cui ci interessa il menu
+     */
+    public List<MenuItem> getMenu(int merchantId) {
+        log.info("Getting menu for merchant {}", merchantId);
+        return restTemplate.getForObject((baseUrl + path).replace("{id}", Integer.toString(merchantId)), List.class);
+    }
+
+    /**
+     * Aggiunge un item al menu del merchant
+     *
+     * @param merchantId Il merchant di cui aggiungere l'item
+     * @param item       L'item da aggiungere
+     */
+    public ResponseEntity<Object> insertItem(int merchantId, MenuItem item, int requesterId) {
+        log.info("Adding menu item to {}", merchantId);
+        final var entity = restTemplate.postForEntity((baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId)), item, Object.class);
+        if (entity.getStatusCode() != HttpStatus.OK) {
+            log.error("Failed to insert menu item: {}", entity.getBody());
+        }
+        return entity;
+    }
+
+    /**
+     * Elimina un item dal menu del merchant
+     *
+     * @param merchantId Il merchant di cui eliminare l'item
+     * @param itemId     L'id dell'item da eliminare
+     */
+    public void deleteMenuItem(int merchantId, int itemId, int requesterId) {
+        log.info("Deleting menu item from {}", merchantId);
+        try {
+
+            restTemplate.delete((baseUrl + path + "/" + itemId + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId)));
+
+        } catch (Exception e) {
+            log.error("Failed to delete menu item: {}", e.getMessage());
+        }
+    }
+}
