@@ -49,7 +49,11 @@ public class AuthController {
     })
     public ResponseEntity<Object> googleSignIn(@RequestBody String tokenId) {
         try {
-            return ResponseEntity.ok(authService.googleSignIn(tokenId));
+            final var response = authService.googleSignIn(tokenId);
+            if (response == null) {
+                return ResponseEntity.status(500).body(BasicResponse.builder().code("LOGIN_FAILED").message("Non è stato possibile effettuare il login").build());
+            }
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

@@ -163,39 +163,45 @@ public class AuthService {
      * @throws JsonProcessingException se fallisce il recupero dei certificati di google per garantire l'integrità del tokenId
      */
     public LoginResponse googleSignIn(String tokenId) throws IOException, GeneralSecurityException {
-        final var transport = new NetHttpTransport();
-        final var factory = new GsonFactory();
+        try {
+            final var transport = new NetHttpTransport();
+            final var factory = new GsonFactory();
 
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory).setAudience(Collections.singletonList(googleClientId)).build();
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory).setAudience(Collections.singletonList(googleClientId)).build();
+            log.info("Verifying google token {}", tokenId);
+            GoogleIdToken token = verifier.verify(tokenId);
+            AuthUser registeredUser;
+            if (token != null) {
+                log.info("Received valid token");
+                GoogleIdToken.Payload payload = token.getPayload();
+                String userId = payload.getSubject();
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+                String familyName = (String) payload.get("family_name");
 
-        GoogleIdToken token = verifier.verify(tokenId);
-        AuthUser registeredUser;
-        if (token != null) {
-            GoogleIdToken.Payload payload = token.getPayload();
-            String userId = payload.getSubject();
-            String email = payload.getEmail();
-            String name = (String) payload.get("name");
-            String familyName = (String) payload.get("family_name");
+                final var user = AuthUser.builder().email(email).firstName(name).lastName(familyName).googleId(userId).build();
+                log.info("Created user from token: {}", email);
+                final var savedUser = userRepository.findByEmail(user.getEmail());
 
-            final var user = AuthUser.builder().email(email).firstName(name).lastName(familyName).googleId(userId).build();
-
-            final var savedUser = userRepository.findByEmail(user.getEmail());
-
-            if (savedUser.isEmpty()) {
-                log.info("Registering {}", user.getEmail());
-                registeredUser = userRepository.save(user);
-
+                if (savedUser.isEmpty()) {
+                    log.info("Registering {}", user.getEmail());
+                    registeredUser = userRepository.save(user);
+                } else {
+                    log.info("User {} already registered", user.getEmail());
+                    registeredUser = savedUser.get();
+                }
             } else {
-                log.info("User {} already registered", user.getEmail());
-                registeredUser = savedUser.get();
+                log.error("Received id token is not valid");
+                return null;
             }
-        } else {
-            log.error("Received id token is not valid");
+
+            final var accessToken = jwtUtils.generateJwt(LoginBody.builder().username(registeredUser.getEmail()).build());
+            log.info("Generated jwt for user {}", registeredUser.getEmail());
+            return LoginResponse.builder().accessToken(accessToken).build();
+        } catch (Exception e) {
+            log.error("Error while logging in with google: {}", e.getMessage());
             return null;
         }
-
-        final var accessToken = jwtUtils.generateJwt(LoginBody.builder().username(registeredUser.getEmail()).build());
-        return LoginResponse.builder().accessToken(accessToken).build();
     }
 
 }
