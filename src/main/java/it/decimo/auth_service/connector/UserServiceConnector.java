@@ -48,12 +48,17 @@ public class UserServiceConnector {
      * @return L'oggetto contenente tutte le informazioni dell'utente
      */
     public UserInfoDto getUserInfo(int id) {
-        final var response = restTemplate.getForEntity(baseUrl + "/api/user/{id}/info", UserInfoDto.class, id);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            log.error("Got a {} response from user_service", response.getStatusCode());
-            return null;
-        }
+       try {
+            final var response = restTemplate.getForEntity(baseUrl + "/api/user/{id}/info", UserInfoDto.class, id);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                log.error("Got a {} response from user_service", response.getStatusCode());
+                return null;
+            }
+        }catch(Exception e){
+           log.error("Error while retrieving userInfo: {}", e.getMessage());
+           return null;
+       }
     }
 }

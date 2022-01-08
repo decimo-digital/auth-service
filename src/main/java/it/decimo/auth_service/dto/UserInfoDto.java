@@ -1,15 +1,13 @@
 package it.decimo.auth_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
+@Setter
 public class UserInfoDto {
     private int id;
     @JsonAlias(value = "first_name")
@@ -26,4 +24,6 @@ public class UserInfoDto {
      * Il codice di referral univoco dell'utente
      */
     private String referral;
+    
+    private boolean isMerchant;
 }
