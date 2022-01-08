@@ -159,15 +159,17 @@ public class AuthService {
 
     /**
      * @param tokenId Il token da utilizzare per l'accesso
+     * @return L'access-token per autenticare le chiamate successive
      * @throws JsonProcessingException se fallisce il recupero dei certificati di google per garantire l'integrità del tokenId
      */
-    public AuthUser googleSignIn(String tokenId) throws IOException, GeneralSecurityException {
+    public LoginResponse googleSignIn(String tokenId) throws IOException, GeneralSecurityException {
         final var transport = new NetHttpTransport();
         final var factory = new GsonFactory();
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory).setAudience(Collections.singletonList(googleClientId)).build();
 
         GoogleIdToken token = verifier.verify(tokenId);
+        AuthUser registeredUser;
         if (token != null) {
             GoogleIdToken.Payload payload = token.getPayload();
             String userId = payload.getSubject();
@@ -181,16 +183,19 @@ public class AuthService {
 
             if (savedUser.isEmpty()) {
                 log.info("Registering {}", user.getEmail());
-                return userRepository.save(user);
+                registeredUser = userRepository.save(user);
 
             } else {
                 log.info("User {} already registered", user.getEmail());
-                return savedUser.get();
+                registeredUser = savedUser.get();
             }
         } else {
             log.error("Received id token is not valid");
             return null;
         }
+
+        final var accessToken = jwtUtils.generateJwt(LoginBody.builder().username(registeredUser.getEmail()).build());
+        return LoginResponse.builder().accessToken(accessToken).build();
     }
 
 }

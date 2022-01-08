@@ -8,7 +8,6 @@ import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.dto.response.LoginResponse;
-import it.decimo.auth_service.model.AuthUser;
 import it.decimo.auth_service.services.AuthService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ public class AuthController {
     @SneakyThrows
     @PostMapping("/google")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUser.class)), description = "Il login è andato bene"),
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponse.class)), description = "Il login è andato bene"),
     })
     public ResponseEntity<Object> googleSignIn(@RequestBody String tokenId) {
         try {
