@@ -34,4 +34,7 @@ public class AuthUser {
 
     @Column(name = "last_name")
     private String lastName;
+    
+    @Column(name = "google_id")
+    private String googleId;
 }

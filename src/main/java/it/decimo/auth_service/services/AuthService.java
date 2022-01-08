@@ -1,9 +1,11 @@
 package it.decimo.auth_service.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
@@ -15,6 +17,15 @@ import it.decimo.auth_service.utils.exception.InvalidJWTBody;
 import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 
 @Service
 @Slf4j
@@ -23,10 +34,17 @@ public class AuthService {
     private UserRepository userRepository;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Value("${google.client.id}")
+    private String googleClientId;
 
     /**
      * Recupera l'id dell'utente che ha inviato la richiesta
-     * 
+     *
      * @param jwt Il JWT per l'autorizzazione della richiesta
      * @return L'id dell'utente corrispondente
      */
@@ -94,13 +112,11 @@ public class AuthService {
      */
     public ResponseEntity<Object> register(RegistrationDto body) {
         log.info("Registering {}", body.getEmail());
-        AuthUser user = AuthUser.builder().email(body.getEmail()).password(body.getPassword())
-                .firstName(body.getFirstName()).lastName(body.getLastName()).build();
+        AuthUser user = AuthUser.builder().email(body.getEmail()).password(body.getPassword()).firstName(body.getFirstName()).lastName(body.getLastName()).build();
 
         if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
-            return ResponseEntity.status(401)
-                    .body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
+            return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
         try {
             user = userRepository.save(user);
@@ -133,13 +149,47 @@ public class AuthService {
                 return ResponseEntity.status(401).body(new BasicResponse("You have to re-login", "TOKEN_NOT_VALID"));
             }
         } catch (InvalidJWTBody e) {
-            return ResponseEntity.status(422)
-                    .body(new BasicResponse("Jwt doesn't contain all the supposed fields", "INVALID_TOKEN"));
+            return ResponseEntity.status(422).body(new BasicResponse("Jwt doesn't contain all the supposed fields", "INVALID_TOKEN"));
         } catch (ExpiredJWTException e) {
             return ResponseEntity.status(422).body(new BasicResponse("Access token was expired", "EXPIRED_TOKEN"));
         } catch (JWTUsernameNotExistingException e) {
-            return ResponseEntity.status(404)
-                    .body(new BasicResponse("Username contained in the JWT doesn't exists", "INVALID_TOKEN"));
+            return ResponseEntity.status(404).body(new BasicResponse("Username contained in the JWT doesn't exists", "INVALID_TOKEN"));
+        }
+    }
+
+    /**
+     * @param tokenId Il token da utilizzare per l'accesso
+     * @throws JsonProcessingException se fallisce il recupero dei certificati di google per garantire l'integrità del tokenId
+     */
+    public AuthUser googleSignIn(String tokenId) throws IOException, GeneralSecurityException {
+        final var transport = new NetHttpTransport();
+        final var factory = new GsonFactory();
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory).setAudience(Collections.singletonList(googleClientId)).build();
+
+        GoogleIdToken token = verifier.verify(tokenId);
+        if (token != null) {
+            GoogleIdToken.Payload payload = token.getPayload();
+            String userId = payload.getSubject();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String familyName = (String) payload.get("family_name");
+
+            final var user = AuthUser.builder().email(email).firstName(name).lastName(familyName).googleId(userId).build();
+
+            final var savedUser = userRepository.findByEmail(user.getEmail());
+
+            if (savedUser.isEmpty()) {
+                log.info("Registering {}", user.getEmail());
+                return userRepository.save(user);
+
+            } else {
+                log.info("User {} already registered", user.getEmail());
+                return savedUser.get();
+            }
+        } else {
+            log.error("Received id token is not valid");
+            return null;
         }
     }
 
