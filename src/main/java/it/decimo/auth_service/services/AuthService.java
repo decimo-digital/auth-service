@@ -1,6 +1,10 @@
 package it.decimo.auth_service.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import it.decimo.auth_service.dto.GoogleTokenDto;
 import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.dto.RegistrationDto;
@@ -18,6 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Collections;
 
 @Service
 @Slf4j
@@ -153,24 +159,45 @@ public class AuthService {
      * @param tokenDto Il token da utilizzare per l'accesso
      * @return L'access-token per autenticare le chiamate successive
      */
+    @SneakyThrows
     public LoginResponse googleSignIn(GoogleTokenDto tokenDto) {
 
-        final var existentUser = userRepository.findByEmail(tokenDto.getEmail());
-        if (existentUser.isEmpty()) {
-            log.info("Received a new user, registering {}", tokenDto.getEmail());
-            var user = AuthUser.builder()
-                    .firstName(tokenDto.getFirstName())
-                    .lastName(tokenDto.getLastName())
-                    .email(tokenDto.getEmail())
-                    .googleId(tokenDto.getGoogleId())
-                    .build();
-            return generateLoginResponse(userRepository.save(user));
-        } else {
-            if (!existentUser.get().getGoogleId().equals(tokenDto.getGoogleId())) {
-                log.error("User {} has sent a different google token", tokenDto.getEmail());
-                return null;
+        final var transporter = new NetHttpTransport();
+        final var jsonFactory = new GsonFactory();
+
+        final var verifier = new GoogleIdTokenVerifier.Builder(transporter, jsonFactory)
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken = verifier.verify(tokenDto.getToken());
+        if (idToken != null) {
+            GoogleIdToken.Payload payload = idToken.getPayload();
+
+            String userId = payload.getSubject();
+            log.info("Trying to log in user {}", userId);
+
+            final var existentUser = userRepository.findByGoogleId(userId);
+            if (existentUser.isPresent()) {
+                log.info("User {} already exists", userId);
+                return generateLoginResponse(existentUser.get());
             }
-            return generateLoginResponse(existentUser.get());
+
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String familyName = (String) payload.get("family_name");
+
+            var user = AuthUser.builder()
+                    .firstName(name)
+                    .lastName(familyName)
+                    .email(email)
+                    .googleId(userId)
+                    .build();
+            user = userRepository.save(user);
+            log.info("User {} successfully registered", userId);
+            return generateLoginResponse(user);
+        } else {
+            System.out.println("Invalid ID token.");
+            return null;
         }
     }
 
