@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/menu")
+@RequestMapping("/api/menu")
 @NeedLogin
 public class MenuController {
 
@@ -32,7 +32,7 @@ public class MenuController {
 
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Ritorna la lista di elementi che compongono il menu del locale", content = @Content(array = @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(implementation = MenuItem.class)))), @ApiResponse(responseCode = "404", description = "Il ristorante ricercato non esite", content = @Content(schema = @Schema(implementation = BasicResponse.class)))})
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getMenu(@PathVariable int id, @RequestHeader(value = "jwt") String jwt) {
+    public ResponseEntity<Object> getMenu(@PathVariable int id, @RequestHeader(value = "access-token") String token) {
         log.info("Requesting menu of merchant {}", id);
         try {
             return ResponseEntity.ok(menuConnector.getMenu(id));
@@ -54,9 +54,9 @@ public class MenuController {
             @ApiResponse(responseCode = "200", description = "Ritorna l'id dell'oggetto che è stato inserito", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
             @ApiResponse(responseCode = "404", description = "Il ristorante ricercato non esite", content = @Content(schema = @Schema(implementation = BasicResponse.class)))})
     @PostMapping("/{id}")
-    public ResponseEntity<Object> insertItem(@PathVariable int id, @RequestBody MenuItem item, @RequestHeader(value = "jwt") String jwt) {
+    public ResponseEntity<Object> insertItem(@PathVariable int id, @RequestBody MenuItem item, @RequestHeader(value = "access-token") String token) {
         try {
-            final var requesterId = authService.getIdFromJwt(jwt);
+            final var requesterId = authService.getIdFromJwt(token);
             log.info("Inserting element in menu to merchant {}", id);
             return menuConnector.insertItem(id, item, requesterId);
         } catch (Exception e) {
@@ -71,9 +71,9 @@ public class MenuController {
 
     @DeleteMapping("/{merchantId}/{itemId}")
     public ResponseEntity<Object> deleteMenuItem(@PathVariable(name = "merchantId") int merchantId,
-                                                 @PathVariable(name = "itemId") int itemId, @RequestHeader(value = "jwt") String jwt) {
+                                                 @PathVariable(name = "itemId") int itemId, @RequestHeader(value = "access-token") String token) {
         try {
-            final var requesterId = authService.getIdFromJwt(jwt);
+            final var requesterId = authService.getIdFromJwt(token);
             menuConnector.deleteMenuItem(merchantId, itemId, requesterId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
