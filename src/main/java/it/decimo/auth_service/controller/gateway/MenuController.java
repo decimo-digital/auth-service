@@ -22,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/menu")
 @NeedLogin
+@CrossOrigin(origins = "*")
 public class MenuController {
 
     @Autowired
