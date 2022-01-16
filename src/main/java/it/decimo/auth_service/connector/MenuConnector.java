@@ -55,9 +55,7 @@ public class MenuConnector {
         }
         return entity;
     }
-
-}
-
+    
     /**
      * Elimina un item dal menu del merchant
      *
@@ -67,9 +65,7 @@ public class MenuConnector {
     public void deleteMenuItem(int merchantId, int itemId, int requesterId) {
         log.info("Deleting menu item from {}", merchantId);
         try {
-
             restTemplate.delete((baseUrl + path + "/" + itemId + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId)));
-
         } catch (Exception e) {
             log.error("Failed to delete menu item: {}", e.getMessage());
         }
