@@ -1,34 +1,23 @@
 package it.decimo.auth_service.services;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import it.decimo.auth_service.configs.AppConfig;
+import it.decimo.auth_service.dto.LoginBody;
+import it.decimo.auth_service.repository.UserRepository;
+import it.decimo.auth_service.utils.exception.*;
+import lombok.SneakyThrows;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import it.decimo.auth_service.configs.AppConfig;
-import it.decimo.auth_service.dto.LoginBody;
-import it.decimo.auth_service.repository.UserRepository;
-import it.decimo.auth_service.utils.exception.ExpiredJWTException;
-import it.decimo.auth_service.utils.exception.InvalidJWTBody;
-import it.decimo.auth_service.utils.exception.InvalidPayloadFormatException;
-import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
-import it.decimo.auth_service.utils.exception.MissingKeyException;
-import lombok.SneakyThrows;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * Classe che contiene tutte le utility per la generazione e la validazione

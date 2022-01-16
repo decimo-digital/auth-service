@@ -1,11 +1,10 @@
 package it.decimo.auth_service.repository;
 
-import java.util.Optional;
-
+import it.decimo.auth_service.model.AuthUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import it.decimo.auth_service.model.AuthUser;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<AuthUser, Integer> {
@@ -16,7 +15,7 @@ public interface UserRepository extends JpaRepository<AuthUser, Integer> {
     Optional<AuthUser> findByEmailAndPassword(String email, String password);
 
     Optional<AuthUser> findByEmail(String email);
-    
+
     Optional<AuthUser> findByGoogleId(String googleId);
 
     void deleteByEmail(String email);

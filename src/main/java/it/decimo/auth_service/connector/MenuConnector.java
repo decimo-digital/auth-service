@@ -20,7 +20,7 @@ public class MenuConnector {
     @Value("${app.connectors.merchantServiceBaseUrl}")
     private String baseUrl;
 
-    private String path = "/api/merchant/{id}/menu";
+    private final String path = "/api/merchant/{id}/menu";
 
     @Autowired
     private RestTemplate restTemplate;

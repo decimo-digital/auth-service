@@ -16,7 +16,7 @@ public class LoginBody {
 
     private String username;
     private String password;
-    
+
     @Override
     public String toString() {
         return String.format("LoginBody [ %s, %s]", username, password);

@@ -1,13 +1,12 @@
 package it.decimo.auth_service.dto;
 
-import java.sql.Date;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Date;
 
 @Data
 @AllArgsConstructor
@@ -28,7 +27,7 @@ public class Prenotation {
 
     /**
      * Contiene giorno-mese-anno della prenotazione
-     * 
+     * <p>
      * Utilizzato solo per scopi di query
      */
     private Date date;

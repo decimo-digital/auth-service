@@ -24,6 +24,6 @@ public class UserInfoDto {
      * Il codice di referral univoco dell'utente
      */
     private String referral;
-    
+
     private boolean isMerchant;
 }

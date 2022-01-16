@@ -1,17 +1,15 @@
 package it.decimo.auth_service.dto;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.springframework.data.geo.Point;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.geo.Point;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
@@ -24,8 +22,15 @@ public class Merchant {
     private Point storeLocation;
 
     private Double distance;
-    
+
     private String cuisineType;
+
+    private String storeDescription;
+    private String storeName;
+    private Integer owner;
+    private Integer freeSeats;
+    private Integer totalSeats;
+    private double occupancyRate;
 
     @JsonAnyGetter
     public Map<String, Double> getStoreLocation() {
@@ -40,21 +45,12 @@ public class Merchant {
         };
     }
 
-    @JsonIgnore
-    public Point getPoint() {
-        return storeLocation;
-    }
-
     public void setStoreLocation(Location location) {
         this.storeLocation = new Point(location.getX(), location.getY());
     }
 
-    private String storeName;
-
-    private Integer owner;
-
-    private Integer freeSeats;
-    private Integer totalSeats;
-
-    private double occupancyRate;
+    @JsonIgnore
+    public Point getPoint() {
+        return storeLocation;
+    }
 }

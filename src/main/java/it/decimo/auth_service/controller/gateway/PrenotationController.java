@@ -44,7 +44,7 @@ public class PrenotationController {
         if (requesterId == null) {
             requesterId = authService.getIdFromJwt(jwt);
         }
-        
+
         log.info("Retrieving prenotations of user {}", requesterId);
         final var prenotations = prenotationServiceConnector.getPrenotations(requesterId);
 

@@ -1,12 +1,10 @@
 package it.decimo.auth_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.springframework.data.geo.Point;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.geo.Point;
 
 @Data
 @NoArgsConstructor

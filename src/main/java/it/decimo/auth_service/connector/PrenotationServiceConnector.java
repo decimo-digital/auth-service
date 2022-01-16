@@ -1,16 +1,15 @@
 package it.decimo.auth_service.connector;
 
-import java.util.List;
-
+import it.decimo.auth_service.dto.Prenotation;
+import it.decimo.auth_service.dto.PrenotationRequestDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import it.decimo.auth_service.dto.Prenotation;
-import it.decimo.auth_service.dto.PrenotationRequestDto;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -21,13 +20,13 @@ public class PrenotationServiceConnector {
     @Autowired
     private RestTemplate restTemplate;
 
-    private String path = "/api/prenotation";
+    private final String path = "/api/prenotation";
 
     /**
      * Invia al PrenotationService la richiesta di prenotazione
-     * 
+     *
      * @return {@literal true} se la prenotazione è andata bene, {@literal false}
-     *         altrimenti
+     * altrimenti
      */
     public ResponseEntity<Object> makePrenotation(PrenotationRequestDto request) {
         return restTemplate.postForEntity(baseUrl + path, request, Object.class);

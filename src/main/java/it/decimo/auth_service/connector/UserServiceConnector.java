@@ -1,17 +1,16 @@
 package it.decimo.auth_service.connector;
 
-import java.util.Map;
-
+import it.decimo.auth_service.dto.RegistrationDto;
+import it.decimo.auth_service.dto.UserInfoDto;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import it.decimo.auth_service.dto.RegistrationDto;
-import it.decimo.auth_service.dto.UserInfoDto;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 
 @Component
 @Setter
@@ -48,7 +47,7 @@ public class UserServiceConnector {
      * @return L'oggetto contenente tutte le informazioni dell'utente
      */
     public UserInfoDto getUserInfo(int id) {
-       try {
+        try {
             final var response = restTemplate.getForEntity(baseUrl + "/api/user/{id}/info", UserInfoDto.class, id);
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
@@ -56,9 +55,9 @@ public class UserServiceConnector {
                 log.error("Got a {} response from user_service", response.getStatusCode());
                 return null;
             }
-        }catch(Exception e){
-           log.error("Error while retrieving userInfo: {}", e.getMessage());
-           return null;
-       }
+        } catch (Exception e) {
+            log.error("Error while retrieving userInfo: {}", e.getMessage());
+            return null;
+        }
     }
 }

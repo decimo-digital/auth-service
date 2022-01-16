@@ -19,7 +19,7 @@ public class MerchantServiceConnector {
     @Value("${app.connectors.merchantServiceBaseUrl}")
     private String baseUrl;
 
-    private String path = "/api/merchant";
+    private final String path = "/api/merchant";
 
     @Autowired
     private RestTemplate restTemplate;

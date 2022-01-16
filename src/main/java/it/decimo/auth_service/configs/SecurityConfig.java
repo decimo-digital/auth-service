@@ -1,16 +1,6 @@
 package it.decimo.auth_service.configs;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.services.JwtUtils;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
@@ -18,6 +8,14 @@ import it.decimo.auth_service.utils.exception.ExpiredJWTException;
 import it.decimo.auth_service.utils.exception.InvalidJWTBody;
 import it.decimo.auth_service.utils.exception.JWTUsernameNotExistingException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig implements WebMvcConfigurer {
