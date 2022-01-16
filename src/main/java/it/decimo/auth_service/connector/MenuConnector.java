@@ -17,13 +17,19 @@ import java.util.List;
 @Slf4j
 public class MenuConnector {
 
+    private final String path = "/api/merchant/{id}/menu";
     @Value("${app.connectors.merchantServiceBaseUrl}")
     private String baseUrl;
-
-    private final String path = "/api/merchant/{id}/menu";
-
     @Autowired
     private RestTemplate restTemplate;
+
+    /**
+     * Aggiorna un elemento del menu di un merchant
+     */
+    public ResponseEntity<Object> updateMenuItem(int merchantId, MenuItem item, int requesterId) {
+        log.info("Updating menu item in {}", merchantId);
+        return restTemplate.patchForObject((baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId)), item, ResponseEntity.class);
+    }
 
     /**
      * Recupera il menu del merchant
@@ -49,6 +55,8 @@ public class MenuConnector {
         }
         return entity;
     }
+
+}
 
     /**
      * Elimina un item dal menu del merchant

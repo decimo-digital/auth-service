@@ -51,6 +51,18 @@ public class MenuController {
         return menuConnector.getCategories();
     }
 
+    @PatchMapping("/{merchantId}")
+    public ResponseEntity<Object> updateMenuItem(@PathVariable int merchantId, @RequestBody MenuItem item, @RequestHeader(value = "access-token") String token) {
+        try {
+            final var requesterId = authService.getIdFromJwt(token);
+            log.info("User {} is updating element in menu to merchant {}", requesterId, merchantId);
+            return menuConnector.updateMenuItem(merchantId, item, requesterId);
+        } catch (Exception e) {
+            log.error("Failed to update menu item", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ritorna l'id dell'oggetto che è stato inserito", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
             @ApiResponse(responseCode = "404", description = "Il ristorante ricercato non esite", content = @Content(schema = @Schema(implementation = BasicResponse.class)))})
