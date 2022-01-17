@@ -28,7 +28,9 @@ public class MenuConnector {
      */
     public ResponseEntity<Object> updateMenuItem(int merchantId, MenuItem item, int requesterId) {
         log.info("Updating menu item in {}", merchantId);
-        return restTemplate.patchForObject((baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId)), item, ResponseEntity.class);
+        final var url = (baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId));
+        log.debug("URL: {}", url);
+        return restTemplate.patchForObject(url, item, ResponseEntity.class);
     }
 
     /**
@@ -55,7 +57,7 @@ public class MenuConnector {
         }
         return entity;
     }
-    
+
     /**
      * Elimina un item dal menu del merchant
      *
