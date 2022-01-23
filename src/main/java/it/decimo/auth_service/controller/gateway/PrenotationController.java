@@ -125,11 +125,8 @@ public class PrenotationController {
     public ResponseEntity<Object> editPrenotation(@RequestHeader("access-token") String jwt,
                                                   @RequestBody Prenotation prenotation) {
         final var requesterId = authService.getIdFromJwt(jwt);
-        try {
-            return prenotationServiceConnector.updatePrenotation(requesterId, prenotation);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        log.info("User {} is patching prenotation {}", requesterId, prenotation.getId());
+        return prenotationServiceConnector.updatePrenotation(requesterId, prenotation);
     }
 
 }

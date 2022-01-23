@@ -85,11 +85,12 @@ public class PrenotationServiceConnector {
     public ResponseEntity<Object> updatePrenotation(int requesterId, Prenotation prenotation) {
         try {
             final var url = baseUrl + path + "/update?userId=" + requesterId;
-            restTemplate.postForObject(url, prenotation, Object.class);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-
+            final var result = restTemplate.postForEntity(url, prenotation, Object.class);
+            log.info("Updated prenotation {}", prenotation.getId());
+            return result;
+        } catch (HttpClientErrorException e) {
+            log.warn("Failed to update prenotation {}", prenotation, e);
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         }
     }
 }
