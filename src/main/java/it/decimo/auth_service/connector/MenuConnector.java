@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -27,10 +28,16 @@ public class MenuConnector {
      * Aggiorna un elemento del menu di un merchant
      */
     public ResponseEntity<Object> updateMenuItem(int merchantId, MenuItem item, int requesterId) {
-        log.info("Updating menu item in {}", merchantId);
-        final var url = (baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId));
-        log.debug("URL: {}", url);
-        return restTemplate.patchForObject(url, item, ResponseEntity.class);
+        try {
+            log.info("Updating menu item in {}", merchantId);
+            final var url = (baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId));
+            log.debug("URL: {}", url);
+            restTemplate.patchForObject(url, item, Object.class);
+            return ResponseEntity.ok().build();
+        } catch (HttpClientErrorException e) {
+            log.warn("Failed to update menu item: {} of merchant {}", item.getMenuItemId(), merchantId, e);
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 
     /**

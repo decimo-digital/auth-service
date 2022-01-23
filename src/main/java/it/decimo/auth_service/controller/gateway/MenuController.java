@@ -52,6 +52,12 @@ public class MenuController {
     }
 
     @PatchMapping("/{merchantId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ritorna la copia dell'oggetto modificato correttamente", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Il ristorante ricercato non esite", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "404", description = "L'oggetto richiesto non esiste", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "401", description = "L'utente che ha richiesto l'update non è autorizzato", content = @Content(schema = @Schema(implementation = BasicResponse.class)))
+    })
     public ResponseEntity<Object> updateMenuItem(@PathVariable int merchantId, @RequestBody MenuItem item, @RequestHeader(value = "access-token") String token) {
         try {
             final var requesterId = authService.getIdFromJwt(token);
