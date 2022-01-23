@@ -54,16 +54,9 @@ public class MerchantController {
                                            @RequestBody Merchant merchant) {
         final var id = authService.getIdFromJwt(jwt);
         merchant.setOwner(id);
+        merchant.setEnabled(true);
 
-        final var saved = merchantServiceConnector.saveMerchant(merchant);
-        if (!saved) {
-            log.error("Failed to save merchant");
-            return ResponseEntity.internalServerError()
-                    .body(new BasicResponse("C'è stato qualche errore a salvare il merchant", "GENERIC_ERROR"));
-        } else {
-            log.info("Saved merchant");
-            return ResponseEntity.ok().body(BasicResponse.builder().code("OK").build());
-        }
+        return merchantServiceConnector.saveMerchant(merchant);
     }
 
     @PatchMapping("/{id}")

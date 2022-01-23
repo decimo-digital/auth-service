@@ -1,14 +1,11 @@
 package it.decimo.auth_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.geo.Point;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -16,41 +13,20 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Merchant {
-
     private Integer id;
-
-    private Point storeLocation;
-
-    private Double distance;
-
-    private String cuisineType;
-
-    private String storeDescription;
+    @JsonAlias(value = "location")
+    private Map<String, Double> storeLocation;
+    private boolean isEnabled;
+    @JsonAlias(value = "store_name")
     private String storeName;
+    @JsonAlias(value = "owner")
     private Integer owner;
+    @JsonAlias(value = "free_seats")
     private Integer freeSeats;
+    private String description;
+    @JsonAlias(value = "occupancy_rate")
+    private float occupancyRate;
+    @JsonAlias(value = "total_seats")
     private Integer totalSeats;
-    private double occupancyRate;
-
-    @JsonAnyGetter
-    public Map<String, Double> getStoreLocation() {
-        if (storeLocation == null) {
-            return new HashMap<>();
-        }
-        return new HashMap<String, Double>() {
-            {
-                put("lat", storeLocation.getX());
-                put("lng", storeLocation.getY());
-            }
-        };
-    }
-
-    public void setStoreLocation(Location location) {
-        this.storeLocation = new Point(location.getX(), location.getY());
-    }
-
-    @JsonIgnore
-    public Point getPoint() {
-        return storeLocation;
-    }
+    private String cuisineType;
 }
