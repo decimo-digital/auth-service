@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -58,6 +61,20 @@ public class UserServiceConnector {
         } catch (Exception e) {
             log.error("Error while retrieving userInfo: {}", e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Recupera tutti i merchant collegati all'utente specificato
+     *
+     * @param userId L'id dell'utente di cui vogliamo i merchant
+     * @return Una lista di merchant collegati all'utente
+     */
+    public ResponseEntity<Object> getConnectedMerchants(int userId) {
+        try {
+            return restTemplate.getForEntity(baseUrl + "/api/user/{userId}/merchants", Object.class, userId);
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         }
     }
 }

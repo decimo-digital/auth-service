@@ -1,7 +1,6 @@
 package it.decimo.auth_service.connector;
 
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,14 +64,14 @@ public class MerchantServiceConnector {
      * Aggiorna i dati relativi al {@link Merchant} il cui id è passato come
      * parametro
      */
-    public boolean updateMerchantData(int merchantId, MerchantData data) {
+    public ResponseEntity<Object> updateMerchantData(int merchantId, Merchant data) {
         try {
-            restTemplate.postForEntity(baseUrl + path + "/{id}/update", data, Object.class, merchantId);
-            log.info("Successfullt patched the requested merchant");
-            return true;
-        } catch (Exception e) {
-            log.error("Failed to update merchant status", e);
-            return false;
+            final var response = restTemplate.postForEntity(baseUrl + path + "/{id}/update", data, Object.class, merchantId);
+            log.info("Successfully patched merchant {}", merchantId);
+            return response;
+        } catch (HttpClientErrorException e) {
+            log.error("Failed to update merchant {}", merchantId, e);
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         }
     }
 

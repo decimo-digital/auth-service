@@ -1,10 +1,12 @@
 package it.decimo.auth_service.controller.gateway;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.UserServiceConnector;
+import it.decimo.auth_service.dto.Merchant;
 import it.decimo.auth_service.dto.UserInfoDto;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.repository.CustomRepository;
@@ -54,5 +56,15 @@ public class UserController {
             userInfo.setMerchant(isMerchant);
             return ResponseEntity.ok(userInfo);
         }
+    }
+
+    @GetMapping("/merchants")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ritorna la lista di tutti i merchant collegati all'utente che manda la richiesta", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Merchant.class)))),
+    })
+    public ResponseEntity<Object> getConnectedMerchants(@RequestHeader("access-token") String jwt) {
+        final var userId = authService.getIdFromJwt(jwt);
+        log.info("Getting connected merchants of user {}", userId);
+        return userServiceConnector.getConnectedMerchants(userId);
     }
 }

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.decimo.auth_service.connector.MerchantServiceConnector;
 import it.decimo.auth_service.dto.Merchant;
-import it.decimo.auth_service.dto.MerchantData;
 import it.decimo.auth_service.dto.response.BasicResponse;
 import it.decimo.auth_service.services.AuthService;
 import it.decimo.auth_service.utils.annotations.NeedLogin;
@@ -61,18 +60,16 @@ public class MerchantController {
 
     @PatchMapping("/{id}")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Il merchant è stato aggiornato"),
+            @ApiResponse(responseCode = "200", description = "Il merchant è stato aggiornato", content = @Content(schema = @Schema(implementation = Merchant.class))),
             @ApiResponse(responseCode = "404", description = "Il merchant richiesto non esiste")
     })
     public ResponseEntity<Object> patchMerchantData(
             @RequestHeader(value = "access-token", required = false) String jwt, @PathVariable int id,
-            @RequestBody MerchantData update) {
-        final var updated = merchantServiceConnector.updateMerchantData(id, update);
-        log.info("Updated merchant with id {}: {}", id, updated);
-        if (!updated) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok().build();
+            @RequestBody Merchant update) {
+        final var requesterId = authService.getIdFromJwt(jwt);
+        log.info("User {} is updating merchant {}", requesterId, id);
+
+        return merchantServiceConnector.updateMerchantData(id, update);
     }
 
     @GetMapping("/{id}/data")
