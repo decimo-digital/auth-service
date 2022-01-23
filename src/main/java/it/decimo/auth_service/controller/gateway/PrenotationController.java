@@ -80,6 +80,19 @@ public class PrenotationController {
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
+    @DeleteMapping("/{prenotationId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "La prenotazione è stata cancellata con successo", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "404", description = "La prenotazione non esiste", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "401", description = "L'utente non può cancellare la prenotazione", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+    })
+    public ResponseEntity<Object> deletePrenotation(@PathVariable(name = "prenotationId") int prenotationId,
+                                                    @RequestHeader("access-token") String jwt) {
+        final var requesterId = authService.getIdFromJwt(jwt);
+        log.info("User {} is deleting prenotation {}", requesterId, prenotationId);
+        return prenotationServiceConnector.deletePrenotation(prenotationId, requesterId);
+    }
+
     @PostMapping("/{prenotationId}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "L'utente specificato è stato aggiunto alla prenotazione", content = @Content(schema = @Schema(implementation = BasicResponse.class))),

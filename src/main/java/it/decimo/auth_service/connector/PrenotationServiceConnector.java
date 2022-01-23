@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -14,13 +15,11 @@ import java.util.List;
 @Component
 @Slf4j
 public class PrenotationServiceConnector {
+    private final String path = "/api/prenotation";
     @Value("${app.connectors.prenotationServiceBaseUrl}")
     private String baseUrl;
-
     @Autowired
     private RestTemplate restTemplate;
-
-    private final String path = "/api/prenotation";
 
     /**
      * Invia al PrenotationService la richiesta di prenotazione
@@ -49,6 +48,21 @@ public class PrenotationServiceConnector {
                 .getForEntity(baseUrl + path + "/" + merchantId + "/prenotations?userId=" + requesterId, List.class);
         log.info("Received {} prenotations for merchant {}", response.getBody().size(), merchantId);
         return response;
+    }
+
+    public ResponseEntity<Object> deletePrenotation(int prenotationId, int requesterId) {
+        try {
+            final var url = baseUrl + path + "/" + prenotationId + "?userId=" + requesterId;
+            restTemplate.delete(url, null, Object.class);
+            log.info("Deleted prenotation {}", prenotationId);
+            return ResponseEntity.ok().build();
+        } catch (HttpClientErrorException e) {
+            log.warn("Got http error: {}", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.info("Error deleting prenotation {}", prenotationId, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     /**
