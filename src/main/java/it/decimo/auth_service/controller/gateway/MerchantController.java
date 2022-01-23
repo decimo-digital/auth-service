@@ -46,7 +46,7 @@ public class MerchantController {
 
     @PostMapping(value = "/", produces = "application/json")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Il merchant è stato salvato", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Il merchant è stato salvato", content = @Content(schema = @Schema(implementation = Merchant.class))),
             @ApiResponse(responseCode = "500", description = "Per qualche problema non ha salvato il merchant", content = @Content(schema = @Schema(implementation = BasicResponse.class)))
     })
     @SneakyThrows

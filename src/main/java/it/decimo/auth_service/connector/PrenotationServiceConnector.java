@@ -28,7 +28,13 @@ public class PrenotationServiceConnector {
      * altrimenti
      */
     public ResponseEntity<Object> makePrenotation(PrenotationRequestDto request) {
-        return restTemplate.postForEntity(baseUrl + path, request, Object.class);
+        try {
+            log.info("User {} is prenotating on merchant {}", request.getRequesterId(), request.getMerchantId());
+            return restTemplate.postForEntity(baseUrl + path, request, Object.class);
+        } catch (HttpClientErrorException e) {
+            log.warn("Failed to make prenotation {}", request, e);
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 
     /**

@@ -31,9 +31,16 @@ public class PrenotationController {
     private AuthService authService;
 
     @PostMapping()
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "L'istanza della prenotazione effettuata", content = @Content(schema = @Schema(implementation = Prenotation.class))),
+            @ApiResponse(responseCode = "404", description = "Non è stato trovato il locale richiesto", content = @Content(schema = @Schema(implementation = BasicResponse.class))),
+            @ApiResponse(responseCode = "422", description = "Non ci sono abbastanza posti a sedere", content = @Content(schema = @Schema(implementation = BasicResponse.class)))
+    })
     public ResponseEntity<Object> createPrenotation(@RequestHeader("access-token") String jwt,
                                                     @RequestBody PrenotationRequestDto prenotationRequest) {
-        log.info("Sending prenotation request: {}", prenotationRequest.toString());
+        final var requesterId = authService.getIdFromJwt(jwt);
+        prenotationRequest.setRequesterId(requesterId);
+        log.info("Sending prenotation request: {}", prenotationRequest);
         return prenotationServiceConnector.makePrenotation(prenotationRequest);
     }
 
