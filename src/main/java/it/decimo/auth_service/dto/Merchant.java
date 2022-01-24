@@ -29,4 +29,5 @@ public class Merchant {
     @JsonAlias(value = "total_seats")
     private Integer totalSeats;
     private String cuisineType;
+    private String image;
 }
