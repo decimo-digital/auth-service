@@ -14,4 +14,6 @@ public class RegistrationDto {
     private String phone;
     private String email;
     private String password;
+    
+    private String googleId;
 }

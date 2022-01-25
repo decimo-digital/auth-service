@@ -33,4 +33,7 @@ public class AuthUser {
 
     @Column(name = "google_id")
     private String googleId;
+    
+    @Transient
+    private boolean isMerchant;
 }

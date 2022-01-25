@@ -110,9 +110,14 @@ public class AuthService {
      */
     public ResponseEntity<Object> register(RegistrationDto body) {
         log.info("Registering {}", body.getEmail());
-        AuthUser user = AuthUser.builder().email(body.getEmail()).password(body.getPassword()).firstName(body.getFirstName()).lastName(body.getLastName()).build();
+        AuthUser user = AuthUser.builder().email(body.getEmail())
+                .password(body.getPassword())
+                .firstName(body.getFirstName())
+                .lastName(body.getLastName())
+                .googleId(body.getGoogleId())
+                .build();
 
-        if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
+        if (userRepository.findByEmailOrGoogleId(user.getEmail(), body.getGoogleId()).isPresent()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }

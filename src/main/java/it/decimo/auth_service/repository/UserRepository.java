@@ -18,5 +18,7 @@ public interface UserRepository extends JpaRepository<AuthUser, Integer> {
 
     Optional<AuthUser> findByGoogleId(String googleId);
 
+    Optional<AuthUser> findByEmailOrGoogleId(String email, String googleId);
+    
     void deleteByEmail(String email);
 }

@@ -30,10 +30,8 @@ public class MerchantController {
     @GetMapping(produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ritorna la lista di esercenti disponibili. Opzionalmente ordinata", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Merchant.class), minItems = 0, uniqueItems = true)))})
-    public ResponseEntity<Object> findAll(@RequestHeader(value = "access-token", required = false) String jwt,
-                                          @RequestParam(name = "lat", required = false) Double lat,
-                                          @RequestParam(name = "lng", required = false) Double lng) {
-        final var merchants = merchantServiceConnector.getMerchants(lat, lng);
+    public ResponseEntity<Object> findAll(@RequestHeader(value = "access-token", required = false) String jwt) {
+        final var merchants = merchantServiceConnector.getMerchants();
         log.info("Received {} merchants from merchant_service", merchants.size());
         try {
             return ResponseEntity.ok().body(merchants);

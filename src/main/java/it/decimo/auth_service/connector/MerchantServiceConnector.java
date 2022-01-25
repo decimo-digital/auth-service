@@ -26,12 +26,9 @@ public class MerchantServiceConnector {
     /**
      * Recupera la lista di esercenti disponibile
      */
-    public List<Merchant> getMerchants(Double lat, Double lng) {
-
+    public List<Merchant> getMerchants() {
         final var builder = new StringBuilder(baseUrl + path);
-        if (lat != null && lng != null) {
-            builder.append("?lat=" + lat + "&lng=" + lng);
-        }
+       
         log.info("Sending request to merchant_service");
         final var response = restTemplate.getForEntity(builder.toString(), List.class);
 
@@ -104,5 +101,21 @@ public class MerchantServiceConnector {
             log.error("Failed to delete merchant", e);
             return false;
         }
+    }
+
+    /**
+     * Recupera i merchant che sono collegati all'utenza richiesta
+     *
+     * @param userId L'id dell'utenza
+     * @return La lista dei merchant collegati all'utenza
+     */
+    public List<Object> getMerchantsOfUser(int userId) {
+        final var url = baseUrl + path + "/user/" + userId;
+        final var response = restTemplate.getForEntity(url, List.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.error("Got status code {} while retrieving merchant data", response.getStatusCode());
+            return new ArrayList<>();
+        }
+        return response.getBody();
     }
 }
