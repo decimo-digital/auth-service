@@ -122,6 +122,12 @@ public class AuthService {
             return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
         try {
+
+
+            final var id = userRepository.getCurrentMaxId() + 1;
+            log.info("[REGISTRATION] Registering user {} with id {}", user.getEmail(), id);
+            user.setId(id);
+            
             user = userRepository.save(user);
         } catch (Exception e) {
             log.error("Error while saving user {}: {}", body.getEmail(), e.getMessage());
@@ -197,7 +203,9 @@ public class AuthService {
                     .email(email)
                     .googleId(userId)
                     .build();
+            
             final var id = userRepository.getCurrentMaxId() + 1;
+            log.info("[GOOGLE] Registering user {} with id {}", user.getEmail(), id);
             user.setId(id);
             user = userRepository.save(user);
             log.info("User {} successfully registered", userId);

@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Builder
 public class AuthUser {
     @Id
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false, unique = true)
     private int id;
 
     @Column(name = "email", nullable = false, unique = true)
