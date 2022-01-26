@@ -94,7 +94,7 @@ public class MerchantServiceConnector {
      */
     public boolean deleteMerchant(int merchantId, int requesterId) {
         try {
-            final var url = baseUrl + path + "/" + merchantId + "?requester=" + requesterId;
+            final var url = baseUrl + path + "/" + merchantId + "?requesterId=" + requesterId;
             restTemplate.delete(url, merchantId);
             return true;
         } catch (Exception e) {
