@@ -197,6 +197,8 @@ public class AuthService {
                     .email(email)
                     .googleId(userId)
                     .build();
+            final var id = userRepository.getCurrentMaxId() + 1;
+            user.setId(id);
             user = userRepository.save(user);
             log.info("User {} successfully registered", userId);
             return generateLoginResponse(user);
