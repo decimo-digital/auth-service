@@ -117,7 +117,7 @@ public class AuthService {
                 .googleId(body.getGoogleId())
                 .build();
 
-        if (userRepository.findByEmailOrGoogleId(user.getEmail(), body.getGoogleId()).isPresent()) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             log.warn("User has sent credentials already in use {}", body.getEmail());
             return ResponseEntity.status(401).body(new BasicResponse("Credentials already in use", "CREDS_ALREAY_USED"));
         }
