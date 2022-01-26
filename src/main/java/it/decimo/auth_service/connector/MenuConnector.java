@@ -31,7 +31,6 @@ public class MenuConnector {
         try {
             log.info("Updating menu item in {}", merchantId);
             final var url = (baseUrl + path + "?requester=" + requesterId).replace("{id}", Integer.toString(merchantId));
-            log.debug("URL: {}", url);
             restTemplate.patchForObject(url, item, Object.class);
             return ResponseEntity.ok().build();
         } catch (HttpClientErrorException e) {

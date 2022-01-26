@@ -47,7 +47,7 @@ public class MenuController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ritorna la lista di categorie per i piatti del menu", content = @Content(array = @ArraySchema(minItems = 0, uniqueItems = true, schema = @Schema(implementation = MenuCategory.class))))
     })
-    public List<MenuCategory> getCategories() {
+    public List<MenuCategory> getCategories(@RequestHeader(value = "access-token") String jwt) {
         return menuConnector.getCategories();
     }
 
