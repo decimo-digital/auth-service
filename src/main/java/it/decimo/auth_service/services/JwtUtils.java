@@ -6,9 +6,8 @@ import it.decimo.auth_service.dto.LoginBody;
 import it.decimo.auth_service.repository.UserRepository;
 import it.decimo.auth_service.utils.exception.*;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -24,6 +23,7 @@ import java.util.*;
  * dell'header JWT per l'autenticazione
  */
 @Service
+@Slf4j
 public class JwtUtils {
     private static final String HMAC_SHA512 = "HmacSHA512";
     /**
@@ -33,7 +33,6 @@ public class JwtUtils {
     final String alg = "HS512";
     final String type = "JWT";
     private final AppConfig appConfig;
-    private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     private final ObjectMapper mapper;
     private final UserRepository userRepository;
 
@@ -158,13 +157,18 @@ public class JwtUtils {
      */
     public boolean isJwtValid(String jwt) throws ExpiredJWTException, JWTUsernameNotExistingException, InvalidJWTBody {
         try {
+            if (jwt.chars().filter(c -> c == '.').count() != 2) {
+                log.error("Received a jwt without all three components");
+                throw new InvalidJWTBody();
+            }
+
             final var payload = jwt.substring(0, jwt.lastIndexOf("."));
             final var newSignature = calculateHMAC(payload, appConfig.getJwtSecret());
 
             final var oldSignature = jwt.substring(jwt.lastIndexOf(".") + 1);
 
             if (!newSignature.equals(oldSignature)) {
-                logger.error("Sent a JWT with an invalid signature");
+                log.error("Sent a JWT with an invalid signature");
                 return false;
             }
 
@@ -179,25 +183,25 @@ public class JwtUtils {
             };
 
             if (props.stream().anyMatch(prop -> !body.containsKey(prop))) {
-                logger.error("Sent jwt didn't have all the required props");
+                log.error("Sent jwt didn't have all the required props");
                 throw new InvalidJWTBody();
             }
 
             final var exp = Date.from(Instant.ofEpochMilli(Long.parseLong(((String) body.get("exp")))));
             if (new Date().after(exp)) {
-                logger.error("Sent jwt was expired");
+                log.error("Sent jwt was expired");
                 throw new ExpiredJWTException();
             }
 
             final var username = ((String) body.get("username"));
-            if (!userRepository.findByEmail(username).isPresent()) {
-                logger.error("Username {} doesn't exists", username);
+            if (userRepository.findByEmail(username).isEmpty()) {
+                log.error("Username {} doesn't exists", username);
                 throw new JWTUsernameNotExistingException();
             }
 
             return true;
         } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidPayloadFormatException e) {
-            logger.error("Caught exception", e);
+            log.error("Caught exception", e);
             return false;
         }
     }
