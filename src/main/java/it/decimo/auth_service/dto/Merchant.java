@@ -14,20 +14,27 @@ import java.util.Map;
 @NoArgsConstructor
 public class Merchant {
     private Integer id;
-    @JsonAlias(value = "location")
-    private Map<String, Double> storeLocation;
+
     private boolean isEnabled;
     @JsonAlias(value = "store_name")
+    
     private String storeName;
+    
     @JsonAlias(value = "owner")
     private Integer owner;
+    
     @JsonAlias(value = "free_seats")
     private Integer freeSeats;
+    
     private String description;
+    
     @JsonAlias(value = "occupancy_rate")
     private float occupancyRate;
+    
     @JsonAlias(value = "total_seats")
     private Integer totalSeats;
+    
     private String cuisineType;
+    
     private String image;
 }
