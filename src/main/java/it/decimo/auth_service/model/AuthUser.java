@@ -10,10 +10,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@SequenceGenerator(name = "auth_users_id_seq", sequenceName = "auth_users_id_seq")
 public class AuthUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "auth_users_id_seq")
     @Column(name = "id", updatable = false, nullable = false)
     private int id;
 
