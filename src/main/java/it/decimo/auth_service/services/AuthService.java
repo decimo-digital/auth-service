@@ -127,7 +127,7 @@ public class AuthService {
             final var id = userRepository.getCurrentMaxId() + 1;
             log.info("[REGISTRATION] Registering user {} with id {}", user.getEmail(), id);
             user.setId(id);
-            
+
             user = userRepository.save(user);
         } catch (Exception e) {
             log.error("Error while saving user {}: {}", body.getEmail(), e.getMessage());
@@ -170,49 +170,53 @@ public class AuthService {
      * @param tokenDto Il token da utilizzare per l'accesso
      * @return L'access-token per autenticare le chiamate successive
      */
-    @SneakyThrows
-    public LoginResponse googleSignIn(GoogleTokenDto tokenDto) {
 
-        final var transporter = new NetHttpTransport();
-        final var jsonFactory = new GsonFactory();
+    public LoginResponse googleSignIn(GoogleTokenDto tokenDto) throws Exception {
+        try {
+            final var transporter = new NetHttpTransport();
+            final var jsonFactory = new GsonFactory();
 
-        final var verifier = new GoogleIdTokenVerifier.Builder(transporter, jsonFactory)
-                .setAudience(Collections.singletonList(googleClientId))
-                .build();
-
-        GoogleIdToken idToken = verifier.verify(tokenDto.getToken());
-        if (idToken != null) {
-            GoogleIdToken.Payload payload = idToken.getPayload();
-
-            String userId = payload.getSubject();
-            log.info("Trying to log in user {}", userId);
-
-            final var existentUser = userRepository.findByGoogleId(userId);
-            if (existentUser.isPresent()) {
-                log.info("User {} already exists", userId);
-                return generateLoginResponse(existentUser.get());
-            }
-
-            String email = payload.getEmail();
-            String name = (String) payload.get("name");
-            String familyName = (String) payload.get("family_name");
-
-            var user = AuthUser.builder()
-                    .firstName(name)
-                    .lastName(familyName)
-                    .email(email)
-                    .googleId(userId)
+            final var verifier = new GoogleIdTokenVerifier.Builder(transporter, jsonFactory)
+                    .setAudience(Collections.singletonList(googleClientId))
                     .build();
-            
-            final var id = userRepository.getCurrentMaxId() + 1;
-            log.info("[GOOGLE] Registering user {} with id {}", user.getEmail(), id);
-            user.setId(id);
-            user = userRepository.save(user);
-            log.info("User {} successfully registered", userId);
-            return generateLoginResponse(user);
-        } else {
-            System.out.println("Invalid ID token.");
-            return null;
+
+            GoogleIdToken idToken = verifier.verify(tokenDto.getToken());
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                String userId = payload.getSubject();
+                log.info("Trying to log in user {}", userId);
+
+                final var existentUser = userRepository.findByGoogleId(userId);
+                if (existentUser.isPresent()) {
+                    log.info("User {} already exists", userId);
+                    return generateLoginResponse(existentUser.get());
+                }
+
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+                String familyName = (String) payload.get("family_name");
+
+                var user = AuthUser.builder()
+                        .firstName(name)
+                        .lastName(familyName)
+                        .email(email)
+                        .googleId(userId)
+                        .build();
+
+                final var id = userRepository.getCurrentMaxId() + 1;
+                log.info("[GOOGLE] Registering user {} with id {}", user.getEmail(), id);
+                user.setId(id);
+                user = userRepository.save(user);
+                log.info("User {} successfully registered", userId);
+                return generateLoginResponse(user);
+            } else {
+                System.out.println("Invalid ID token.");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("Failed to register user with google", e);
+            throw e;
         }
     }
 
