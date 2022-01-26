@@ -28,7 +28,7 @@ public class MerchantServiceConnector {
      */
     public List<Merchant> getMerchants() {
         final var builder = new StringBuilder(baseUrl + path);
-       
+
         log.info("Sending request to merchant_service");
         final var response = restTemplate.getForEntity(builder.toString(), List.class);
 
@@ -94,7 +94,7 @@ public class MerchantServiceConnector {
      */
     public boolean deleteMerchant(int merchantId, int requesterId) {
         try {
-            final var url = baseUrl + path + "/merchantId?requester=" + requesterId;
+            final var url = baseUrl + path + "/" + merchantId + "?requester=" + requesterId;
             restTemplate.delete(url, merchantId);
             return true;
         } catch (Exception e) {
